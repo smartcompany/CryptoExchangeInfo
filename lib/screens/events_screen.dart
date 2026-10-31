@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../models/exchange_event.dart';
 import '../models/opportunity.dart';
@@ -420,7 +419,20 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
     }
   }
 
-  List<Opportunity> get _filtered {
+  List<ExchangeEvent> get _notices {
+    final items = _data?.items ?? const <ExchangeEvent>[];
+    final query = widget.searchQuery.trim().toLowerCase();
+    if (query.isEmpty) return items;
+    return items
+        .where((e) =>
+            e.displayTitle.toLowerCase().contains(query) ||
+            e.displayDescription.toLowerCase().contains(query) ||
+            e.displayTags.any((t) => t.toLowerCase().contains(query)))
+        .toList();
+  }
+
+  List<Opportunity> get _filteredOpportunities {
+    if (_typeFilter == OpportunityType.event) return const [];
     final query = widget.searchQuery.trim().toLowerCase();
     var list = _allForExchange.where((o) {
       if (_typeFilter != null && o.type != _typeFilter) return false;
@@ -445,16 +457,28 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
         });
       case OpportunitySort.newest:
         list.sort((a, b) {
-          final aa = a.asOf ?? a.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
-          final bb = b.asOf ?? b.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final aa =
+              a.asOf ?? a.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bb =
+              b.asOf ?? b.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
           return bb.compareTo(aa);
         });
     }
     return list;
   }
 
-  Set<OpportunityType> get _availableTypes =>
-      _allForExchange.map((o) => o.type).toSet();
+  bool get _showNotices {
+    if (_typeFilter == null) return true;
+    return _typeFilter == OpportunityType.event;
+  }
+
+  Set<OpportunityType> get _availableTypes {
+    final types = _allForExchange.map((o) => o.type).toSet();
+    if ((_data?.items.isNotEmpty ?? false)) {
+      types.add(OpportunityType.event);
+    }
+    return types;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -505,13 +529,17 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
       );
     }
 
-    final notices = _data?.items ?? const <ExchangeEvent>[];
-    final filtered = _filtered;
-    final activeCount = filtered
-        .where((o) =>
-            o.status == OpportunityStatus.live ||
-            o.status == OpportunityStatus.endingSoon)
-        .length;
+    final notices = _showNotices ? _notices : const <ExchangeEvent>[];
+    final opportunities = _filteredOpportunities;
+    final hasFeed = _allForExchange.isNotEmpty || (_data?.items.isNotEmpty ?? false);
+    final activeCount = _typeFilter == OpportunityType.event
+        ? notices.length
+        : opportunities
+                .where((o) =>
+                    o.status == OpportunityStatus.live ||
+                    o.status == OpportunityStatus.endingSoon)
+                .length +
+            (_typeFilter == null ? notices.length : 0);
 
     return RefreshIndicator(
       color: AppColors.brand,
@@ -520,7 +548,7 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
         padding: const EdgeInsets.only(bottom: 88),
         children: [
           ExchangeBanner(exchange: widget.exchange),
-          if (_allForExchange.isNotEmpty) ...[
+          if (hasFeed) ...[
             _TypeChipBar(
               available: _availableTypes,
               selected: _typeFilter,
@@ -531,7 +559,7 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
               sort: _sort,
               onSortChanged: (sort) => setState(() => _sort = sort),
             ),
-            if (filtered.isEmpty)
+            if (opportunities.isEmpty && notices.isEmpty)
               const Padding(
                 padding: EdgeInsets.fromLTRB(
                   AppColors.contentInset,
@@ -540,12 +568,20 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
                   8,
                 ),
                 child: Text(
-                  '조건에 맞는 이벤트가 없습니다.',
+                  '조건에 맞는 항목이 없습니다.',
                   style: TextStyle(color: AppColors.muted),
                 ),
               )
-            else
-              for (final item in filtered) OpportunityCard(opportunity: item),
+            else ...[
+              for (final item in opportunities)
+                OpportunityCard(opportunity: item),
+              for (final event in notices)
+                EventCard(
+                  event: event,
+                  service: widget.service,
+                  exchange: widget.exchange,
+                ),
+            ],
           ] else
             const Padding(
               padding: EdgeInsets.fromLTRB(
@@ -555,25 +591,10 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
                 8,
               ),
               child: Text(
-                '이 거래소의 큐레이션된 이벤트는 아직 없습니다. 아래 일반 공지를 확인하세요.',
+                '표시할 이벤트가 없습니다.',
                 style: TextStyle(color: AppColors.muted, height: 1.4),
               ),
             ),
-          if (notices.isNotEmpty) ...[
-            _NoticesHeader(
-              exchange: widget.exchange,
-              shown: notices.length,
-              total: _data?.total ?? notices.length,
-              fromCache: _data?.fromCache ?? false,
-              fetchedAt: _data?.fetchedAt,
-            ),
-            for (final event in notices)
-              EventCard(
-                event: event,
-                service: widget.service,
-                exchange: widget.exchange,
-              ),
-          ],
         ],
       ),
     );
@@ -593,9 +614,13 @@ class _TypeChipBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final types = OpportunityType.values
-        .where((t) => available.contains(t))
-        .toList(growable: false);
+    // Keep 이벤트 immediately after 전체, then remaining types.
+    final types = <OpportunityType>[
+      if (available.contains(OpportunityType.event)) OpportunityType.event,
+      ...OpportunityType.values.where(
+        (t) => t != OpportunityType.event && available.contains(t),
+      ),
+    ];
 
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
@@ -740,59 +765,6 @@ class _ListToolbar extends StatelessWidget {
                 ],
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NoticesHeader extends StatelessWidget {
-  const _NoticesHeader({
-    required this.exchange,
-    required this.shown,
-    required this.total,
-    required this.fromCache,
-    this.fetchedAt,
-  });
-
-  final Exchange exchange;
-  final int shown;
-  final int total;
-  final bool fromCache;
-  final DateTime? fetchedAt;
-
-  static final _timeFormat = DateFormat('MM.dd HH:mm');
-
-  @override
-  Widget build(BuildContext context) {
-    final source = fromCache ? '로컬 SQL 캐시' : '최신 조회';
-    final fetchedLabel = fetchedAt == null
-        ? ''
-        : ' · 저장 ${_timeFormat.format(fetchedAt!.toLocal())}';
-
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        AppColors.contentInset,
-        22,
-        AppColors.contentInset,
-        6,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '일반 공지',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
-              color: AppColors.ink,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${exchange.labelKo} · $source ($shown / 전체 $total)$fetchedLabel',
-            style: const TextStyle(fontSize: 13, color: AppColors.muted),
           ),
         ],
       ),

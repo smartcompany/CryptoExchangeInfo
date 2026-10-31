@@ -397,6 +397,7 @@ class _ThumbArt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icon = switch (type) {
+      OpportunityType.event => Icons.campaign_outlined,
       OpportunityType.earnBoost => Icons.savings_outlined,
       OpportunityType.tradingContest => Icons.emoji_events_outlined,
       OpportunityType.dualChallenge => Icons.swap_vert_circle_outlined,

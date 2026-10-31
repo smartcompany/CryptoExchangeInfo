@@ -153,6 +153,7 @@ class ExchangeEventsService {
   }
 
   /// Resolves a campaign image asynchronously and persists it in local SQL.
+  /// Returns a display URL safe for [Image.network] (proxied on web).
   Future<String?> fetchEventImage({
     required Exchange exchange,
     required String url,
@@ -179,7 +180,17 @@ class ExchangeEventsService {
       url: url,
       imageUrl: normalized,
     );
-    return normalized;
+    return displayImageUrl(normalized);
+  }
+
+  /// CDN images often block browser CORS; on web load via our proxy.
+  String? displayImageUrl(String? imageUrl) {
+    final trimmed = imageUrl?.trim();
+    if (trimmed == null || trimmed.isEmpty) return null;
+    if (!kIsWeb) return trimmed;
+    return Uri.parse('$apiBaseUrl/api/image-proxy').replace(
+      queryParameters: {'url': trimmed},
+    ).toString();
   }
 
   Future<void> close() => _db.close();

@@ -27,16 +27,14 @@ class _EventCardState extends State<EventCard> {
 
   String? _imageUrl;
   var _fetchingImage = false;
+  var _imageFailed = false;
 
   ExchangeEvent get event => widget.event;
 
   @override
   void initState() {
     super.initState();
-    _imageUrl = _normalizedImageUrl(event.imageUrl);
-    if (_imageUrl == null) {
-      _loadImage();
-    }
+    _bootstrapImage();
   }
 
   @override
@@ -44,19 +42,19 @@ class _EventCardState extends State<EventCard> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.event.url != event.url ||
         oldWidget.event.imageUrl != event.imageUrl) {
-      _imageUrl = _normalizedImageUrl(event.imageUrl);
-      if (_imageUrl == null) {
-        _loadImage();
-      } else {
-        _fetchingImage = false;
-      }
+      _bootstrapImage();
     }
   }
 
-  static String? _normalizedImageUrl(String? value) {
-    final trimmed = value?.trim();
-    if (trimmed == null || trimmed.isEmpty) return null;
-    return trimmed;
+  void _bootstrapImage() {
+    _imageFailed = false;
+    final cached = widget.service.displayImageUrl(event.imageUrl);
+    _imageUrl = cached;
+    if (_imageUrl == null) {
+      _loadImage();
+    } else {
+      _fetchingImage = false;
+    }
   }
 
   Future<void> _loadImage() async {
@@ -72,7 +70,7 @@ class _EventCardState extends State<EventCard> {
     }
     if (resolved == null) return;
 
-    _fetchingImage = true;
+    setState(() => _fetchingImage = true);
     try {
       final imageUrl = await widget.service.fetchEventImage(
         exchange: resolved,
@@ -80,12 +78,16 @@ class _EventCardState extends State<EventCard> {
       );
       if (!mounted) return;
       setState(() {
-        _imageUrl = _normalizedImageUrl(imageUrl);
+        _imageUrl = imageUrl;
         _fetchingImage = false;
+        _imageFailed = imageUrl == null;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _fetchingImage = false);
+      setState(() {
+        _fetchingImage = false;
+        _imageFailed = true;
+      });
     }
   }
 
@@ -93,7 +95,7 @@ class _EventCardState extends State<EventCard> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final period = _periodLabel();
-    final imageUrl = _imageUrl;
+    final showThumb = _imageUrl != null && !_imageFailed;
 
     return Card(
       margin: const EdgeInsets.symmetric(
@@ -106,7 +108,50 @@ class _EventCardState extends State<EventCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (imageUrl != null) _EventThumbnail(url: imageUrl),
+            if (showThumb)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Image.network(
+                  _imageUrl!,
+                  fit: BoxFit.cover,
+                  alignment: Alignment.center,
+                  gaplessPlayback: true,
+                  loadingBuilder: (context, child, progress) {
+                    if (progress == null) return child;
+                    return ColoredBox(
+                      color: theme.colorScheme.surfaceContainerHighest,
+                      child: const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (context, error, stackTrace) {
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      if (!mounted || _imageFailed) return;
+                      setState(() => _imageFailed = true);
+                    });
+                    return const SizedBox.shrink();
+                  },
+                ),
+              )
+            else if (_fetchingImage)
+              AspectRatio(
+                aspectRatio: 16 / 9,
+                child: ColoredBox(
+                  color: theme.colorScheme.surfaceContainerHighest,
+                  child: const Center(
+                    child: SizedBox(
+                      width: 24,
+                      height: 24,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    ),
+                  ),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -116,7 +161,18 @@ class _EventCardState extends State<EventCard> {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      for (final tag in event.displayTags.take(3))
+                      Chip(
+                        label: Text(
+                          widget.exchange?.labelKo ?? '이벤트',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        padding: EdgeInsets.zero,
+                        labelPadding:
+                            const EdgeInsets.symmetric(horizontal: 10),
+                      ),
+                      for (final tag in event.displayTags.take(2))
                         Chip(
                           label:
                               Text(tag, style: const TextStyle(fontSize: 14)),
@@ -221,32 +277,5 @@ class _EventCardState extends State<EventCard> {
         const SnackBar(content: Text('링크를 열 수 없습니다.')),
       );
     }
-  }
-}
-
-/// Renders a 16:9 thumbnail only after the network image has decoded.
-class _EventThumbnail extends StatelessWidget {
-  const _EventThumbnail({required this.url});
-
-  final String url;
-
-  @override
-  Widget build(BuildContext context) {
-    return Image.network(
-      url,
-      fit: BoxFit.cover,
-      alignment: Alignment.center,
-      gaplessPlayback: true,
-      frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-        if (wasSynchronouslyLoaded || frame != null) {
-          return AspectRatio(
-            aspectRatio: 16 / 9,
-            child: child,
-          );
-        }
-        return const SizedBox.shrink();
-      },
-      errorBuilder: (context, error, stackTrace) => const SizedBox.shrink(),
-    );
   }
 }

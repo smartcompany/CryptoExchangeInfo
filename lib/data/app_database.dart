@@ -62,7 +62,13 @@ class AppDatabase extends _$AppDatabase {
       );
 
   static QueryExecutor _open() {
-    return driftDatabase(name: 'coininfo');
+    return driftDatabase(
+      name: 'coininfo',
+      web: DriftWebOptions(
+        sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+        driftWorker: Uri.parse('drift_worker.js'),
+      ),
+    );
   }
 
   Future<ExchangeEventsSnapshot?> readExchangeSnapshot(String exchange) async {

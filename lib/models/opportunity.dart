@@ -1,4 +1,6 @@
 enum OpportunityType {
+  /// Exchange announcement feed (API notices).
+  event,
   tradingContest,
   earnBoost,
   depositBonus,
@@ -10,6 +12,7 @@ enum OpportunityType {
 
   static OpportunityType fromWire(String? value) {
     return switch (value) {
+      'event' => OpportunityType.event,
       'trading_contest' => OpportunityType.tradingContest,
       'earn_boost' => OpportunityType.earnBoost,
       'deposit_bonus' => OpportunityType.depositBonus,
@@ -22,6 +25,7 @@ enum OpportunityType {
   }
 
   String get wire => switch (this) {
+        OpportunityType.event => 'event',
         OpportunityType.tradingContest => 'trading_contest',
         OpportunityType.earnBoost => 'earn_boost',
         OpportunityType.depositBonus => 'deposit_bonus',
@@ -33,6 +37,7 @@ enum OpportunityType {
       };
 
   String get labelKo => switch (this) {
+        OpportunityType.event => '이벤트',
         OpportunityType.tradingContest => '거래대회',
         OpportunityType.earnBoost => 'Earn부스트',
         OpportunityType.depositBonus => '입금보너스',
