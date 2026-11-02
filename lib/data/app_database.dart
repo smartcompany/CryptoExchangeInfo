@@ -37,6 +37,9 @@ class ExchangeCaches extends Table {
   TextColumn get exchange => text()();
   IntColumn get total => integer().withDefault(const Constant(0))();
   IntColumn get fetchedAtMs => integer()();
+  /// App language used when titles/descriptions were localized into cache.
+  TextColumn get localeCode =>
+      text().withDefault(const Constant('ko'))();
 
   @override
   Set<Column<Object>> get primaryKey => {exchange};
@@ -47,7 +50,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _open());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -57,6 +60,9 @@ class AppDatabase extends _$AppDatabase {
         onUpgrade: (Migrator m, int from, int to) async {
           if (from < 2) {
             await m.addColumn(cachedEvents, cachedEvents.imageUrl);
+          }
+          if (from < 3) {
+            await m.addColumn(exchangeCaches, exchangeCaches.localeCode);
           }
         },
       );
@@ -87,6 +93,7 @@ class AppDatabase extends _$AppDatabase {
       exchange: exchange,
       total: meta.total,
       fetchedAt: DateTime.fromMillisecondsSinceEpoch(meta.fetchedAtMs),
+      localeCode: meta.localeCode,
       items: rows.map(_rowToEvent).toList(),
     );
   }
@@ -95,6 +102,7 @@ class AppDatabase extends _$AppDatabase {
     required String exchange,
     required int total,
     required List<ExchangeEvent> items,
+    String localeCode = 'en',
   }) async {
     final now = DateTime.now().millisecondsSinceEpoch;
     await transaction(() async {
@@ -105,6 +113,7 @@ class AppDatabase extends _$AppDatabase {
           exchange: exchange,
           total: Value(total),
           fetchedAtMs: now,
+          localeCode: Value(localeCode),
         ),
       );
       for (var i = 0; i < items.length; i++) {
@@ -181,12 +190,14 @@ class ExchangeEventsSnapshot {
     required this.total,
     required this.fetchedAt,
     required this.items,
+    this.localeCode = 'en',
   });
 
   final String exchange;
   final int total;
   final DateTime fetchedAt;
   final List<ExchangeEvent> items;
+  final String localeCode;
 
   bool isFresh(Duration ttl) {
     return DateTime.now().difference(fetchedAt) <= ttl;

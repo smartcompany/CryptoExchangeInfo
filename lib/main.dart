@@ -1,30 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'l10n/app_localizations.dart';
 import 'screens/events_screen.dart';
+import 'services/ad_gate.dart';
 import 'services/exchange_events_service.dart';
 import 'theme/app_colors.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const CoinInfoApp());
+  await AdGate.initialize(ExchangeEventsService.productionApiBaseUrl);
+  runApp(const ExoraApp());
 }
 
-class CoinInfoApp extends StatelessWidget {
-  const CoinInfoApp({super.key, this.eventsService});
+class ExoraApp extends StatelessWidget {
+  const ExoraApp({super.key, this.eventsService});
 
   final ExchangeEventsService? eventsService;
 
   @override
   Widget build(BuildContext context) {
-    final base = ColorScheme.fromSeed(
-      seedColor: AppColors.brand,
-      brightness: Brightness.light,
-    ).copyWith(
-      primary: AppColors.brand,
-      onPrimary: Colors.white,
-      surface: AppColors.card,
-      onSurface: AppColors.ink,
-    );
+    final base =
+        ColorScheme.fromSeed(
+          seedColor: AppColors.brand,
+          brightness: Brightness.light,
+        ).copyWith(
+          primary: AppColors.brand,
+          onPrimary: Colors.white,
+          surface: AppColors.card,
+          onSurface: AppColors.ink,
+        );
 
     const textTheme = TextTheme(
       titleLarge: TextStyle(
@@ -46,8 +51,15 @@ class CoinInfoApp extends StatelessWidget {
     );
 
     return MaterialApp(
-      title: 'CoinInfo',
+      onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         colorScheme: base,
         useMaterial3: true,
@@ -67,9 +79,17 @@ class CoinInfoApp extends StatelessWidget {
         ),
         chipTheme: ChipThemeData(
           selectedColor: AppColors.brand,
-          backgroundColor: AppColors.card,
+          backgroundColor: AppColors.chipIdle,
+          disabledColor: AppColors.chipIdle,
           side: const BorderSide(color: AppColors.line),
-          labelStyle: const TextStyle(fontWeight: FontWeight.w700),
+          labelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: AppColors.muted,
+          ),
+          secondaryLabelStyle: const TextStyle(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(999),
           ),

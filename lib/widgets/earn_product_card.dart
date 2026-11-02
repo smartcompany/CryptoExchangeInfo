@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_labels.dart';
 import '../models/earn_product.dart';
 
 class EarnProductCard extends StatelessWidget {
@@ -11,6 +13,8 @@ class EarnProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final note = _localizedNote(l10n, product.note);
     final apr = product.aprDisplay ?? '-';
     final canOpenEarnPage = product.earnPageUrl != null;
 
@@ -25,13 +29,15 @@ class EarnProductCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    product.exchangeLabel,
+                    l10n.exchangeNameFor(product.exchange),
                     style: theme.textTheme.titleMedium,
                   ),
                 ),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: product.available
                         ? theme.colorScheme.primaryContainer
@@ -39,7 +45,9 @@ class EarnProductCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    product.available ? 'Flexible USDT' : '미지원',
+                    product.available
+                        ? l10n.earnHeroTitle
+                        : l10n.earnUnsupported,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: product.available
                           ? theme.colorScheme.onPrimaryContainer
@@ -59,30 +67,32 @@ class EarnProductCard extends StatelessWidget {
                 ),
               ),
               Text(
-                '예상/고시 APR (Flexible)',
+                l10n.earnAprLabel,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               if (product.marketAprDisplay != null) ...[
                 const SizedBox(height: 6),
-                Text('Market APR ${product.marketAprDisplay}'),
+                Text(l10n.earnMarketApr(product.marketAprDisplay!)),
               ],
               if (product.avgAprDisplay != null) ...[
                 const SizedBox(height: 6),
                 Text(
-                  '평균 ${product.avgAprDisplay}'
-                  '${product.prevAprDisplay != null ? ' · 직전 ${product.prevAprDisplay}' : ''}',
+                  l10n.earnAvgApr(product.avgAprDisplay!) +
+                      (product.prevAprDisplay != null
+                          ? l10n.earnPrevApr(product.prevAprDisplay!)
+                          : ''),
                 ),
               ],
               if (product.minAmount != null) ...[
                 const SizedBox(height: 6),
-                Text('최소 ${product.minAmount} USDT'),
+                Text(l10n.earnMinAmount(product.minAmount!)),
               ],
               if (product.tiers.isNotEmpty) ...[
                 const SizedBox(height: 12),
                 Text(
-                  '구간별 금리',
+                  l10n.earnTierRates,
                   style: theme.textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
@@ -103,10 +113,10 @@ class EarnProductCard extends StatelessWidget {
                   ),
               ],
             ],
-            if (product.note != null && product.note!.isNotEmpty) ...[
+            if (note != null && note.isNotEmpty) ...[
               const SizedBox(height: 10),
               Text(
-                product.note!,
+                note,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.outline,
                 ),
@@ -120,12 +130,12 @@ class EarnProductCard extends StatelessWidget {
                     ? FilledButton.tonalIcon(
                         onPressed: () => _openEarnPage(context),
                         icon: const Icon(Icons.open_in_new, size: 18),
-                        label: const Text('Earn 페이지로 이동'),
+                        label: Text(l10n.earnOpenPage),
                       )
                     : TextButton.icon(
                         onPressed: () => _openEarnPage(context),
                         icon: const Icon(Icons.open_in_new, size: 18),
-                        label: const Text('Earn 페이지로 이동'),
+                        label: Text(l10n.earnOpenPage),
                       ),
               ),
             ],
@@ -135,22 +145,34 @@ class EarnProductCard extends StatelessWidget {
     );
   }
 
+  /// Maps note keys from [EarnService] to localized text; raw notes pass through.
+  static String? _localizedNote(AppLocalizations l10n, String? note) {
+    return switch (note) {
+      'unavailable_bitget' => l10n.earnUnavailableBitget,
+      'unavailable_upbit' => l10n.earnUnavailableUpbit,
+      'unavailable_bithumb' => l10n.earnUnavailableBithumb,
+      'tier_note' => l10n.earnTierNote,
+      _ => note,
+    };
+  }
+
   Future<void> _openEarnPage(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final raw = product.earnPageUrl;
     final uri = raw == null ? null : Uri.tryParse(raw);
     if (uri == null) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('유효한 링크가 없습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.invalidLink)));
       }
       return;
     }
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Earn 페이지를 열 수 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.cannotOpenEarnPage)));
     }
   }
 }

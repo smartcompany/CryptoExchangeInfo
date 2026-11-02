@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../models/exchange_event.dart';
 import '../models/opportunity.dart';
+import '../services/exchange_event_fetchers.dart';
 import '../services/exchange_events_service.dart';
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_labels.dart';
 import '../services/opportunity_repository.dart';
 import '../theme/app_colors.dart';
 import '../widgets/event_card.dart';
@@ -10,33 +15,32 @@ import '../widgets/exchange_banner.dart';
 import '../widgets/opportunity_card.dart';
 import 'earning_screen.dart';
 
-enum HomeSection { events, earning }
+enum HomeSection { events, contests, earning }
 
 enum OpportunitySort { endingSoon, newest }
 
 extension HomeSectionX on HomeSection {
-  String get labelKo => switch (this) {
-        HomeSection.events => '거래소 이벤트',
-        HomeSection.earning => 'Earning (Flexible USDT)',
-      };
+  String label(AppLocalizations l10n) => switch (this) {
+    HomeSection.events => l10n.sectionEvents,
+    HomeSection.contests => l10n.typeTradingContest,
+    HomeSection.earning => l10n.sectionEarning,
+  };
 
-  String get shortLabelKo => switch (this) {
-        HomeSection.events => '거래소 이벤트',
-        HomeSection.earning => 'Flexible USDT',
-      };
+  String shortLabel(AppLocalizations l10n) => switch (this) {
+    HomeSection.events => l10n.sectionEvents,
+    HomeSection.contests => l10n.typeTradingContest,
+    HomeSection.earning => l10n.sectionEarningShort,
+  };
 
   IconData get icon => switch (this) {
-        HomeSection.events => Icons.campaign_outlined,
-        HomeSection.earning => Icons.savings_outlined,
-      };
+    HomeSection.events => Icons.campaign_outlined,
+    HomeSection.contests => Icons.emoji_events_outlined,
+    HomeSection.earning => Icons.savings_outlined,
+  };
 }
 
 class EventsScreen extends StatefulWidget {
-  const EventsScreen({
-    super.key,
-    this.service,
-    this.opportunityRepository,
-  });
+  const EventsScreen({super.key, this.service, this.opportunityRepository});
 
   final ExchangeEventsService? service;
   final OpportunityRepository? opportunityRepository;
@@ -58,12 +62,17 @@ class _EventsScreenState extends State<EventsScreen> {
   final _searchController = TextEditingController();
 
   static const _tabs = [
-    Exchange.bybit,
     Exchange.binance,
     Exchange.okx,
+    Exchange.bybit,
+    Exchange.gate,
+    Exchange.mexc,
+    Exchange.bitget,
+    Exchange.kucoin,
+    Exchange.coinbase,
+    Exchange.htx,
     Exchange.upbit,
     Exchange.bithumb,
-    Exchange.bitget,
   ];
 
   @override
@@ -96,17 +105,20 @@ class _EventsScreenState extends State<EventsScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Padding(
-                padding: EdgeInsets.fromLTRB(20, 4, 20, 8),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
                 child: Text(
-                  '메뉴 선택',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  AppLocalizations.of(context).menuSelect,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
               ),
               for (final section in HomeSection.values)
                 ListTile(
                   leading: Icon(section.icon, color: AppColors.brand),
-                  title: Text(section.labelKo),
+                  title: Text(section.label(AppLocalizations.of(context))),
                   trailing: section == _section
                       ? const Icon(Icons.check_circle, color: AppColors.brand)
                       : null,
@@ -120,7 +132,12 @@ class _EventsScreenState extends State<EventsScreen> {
       },
     );
     if (selected == null || selected == _section) return;
-    setState(() => _section = selected);
+    setState(() {
+      _section = selected;
+      _searchOpen = false;
+      _searchController.clear();
+      _searchQuery = '';
+    });
   }
 
   void _selectExchange(int index) {
@@ -135,7 +152,9 @@ class _EventsScreenState extends State<EventsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isEvents = _section == HomeSection.events;
+    final l10n = AppLocalizations.of(context);
+    final showSearch =
+        _section == HomeSection.events || _section == HomeSection.contests;
 
     return Scaffold(
       backgroundColor: AppColors.page,
@@ -145,12 +164,12 @@ class _EventsScreenState extends State<EventsScreen> {
         elevation: 0,
         scrolledUnderElevation: 0.5,
         titleSpacing: 12,
-        title: _searchOpen && isEvents
+        title: _searchOpen && showSearch
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                decoration: const InputDecoration(
-                  hintText: '이벤트 검색',
+                decoration: InputDecoration(
+                  hintText: l10n.searchEventsHint,
                   border: InputBorder.none,
                   isDense: true,
                 ),
@@ -168,16 +187,12 @@ class _EventsScreenState extends State<EventsScreen> {
                         color: AppColors.brand,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
-                        _section.icon,
-                        color: Colors.white,
-                        size: 20,
-                      ),
+                      child: Icon(_section.icon, color: Colors.white, size: 20),
                     ),
                     const SizedBox(width: 10),
                     Flexible(
                       child: Text(
-                        _section.shortLabelKo,
+                        _section.shortLabel(l10n),
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontSize: 20,
@@ -194,9 +209,11 @@ class _EventsScreenState extends State<EventsScreen> {
                 ),
               ),
         actions: [
-          if (isEvents) ...[
+          if (showSearch) ...[
             IconButton(
-              tooltip: _searchOpen ? '검색 닫기' : '검색',
+              tooltip: _searchOpen
+                  ? l10n.searchCloseTooltip
+                  : l10n.searchTooltip,
               onPressed: () {
                 setState(() {
                   _searchOpen = !_searchOpen;
@@ -212,10 +229,10 @@ class _EventsScreenState extends State<EventsScreen> {
               ),
             ),
             IconButton(
-              tooltip: '알림',
+              tooltip: l10n.notificationsTooltip,
               onPressed: () {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('알림 기능은 곧 제공됩니다.')),
+                  SnackBar(content: Text(l10n.notificationsComingSoon)),
                 );
               },
               icon: const Icon(
@@ -226,34 +243,41 @@ class _EventsScreenState extends State<EventsScreen> {
           ],
         ],
       ),
-      body: isEvents
-          ? Column(
-              children: [
-                _ExchangePillBar(
-                  exchanges: _tabs,
-                  selectedIndex: _exchangeIndex,
-                  onSelected: _selectExchange,
+      body: switch (_section) {
+        HomeSection.events => Column(
+            children: [
+              _ExchangePillBar(
+                exchanges: _tabs,
+                selectedIndex: _exchangeIndex,
+                onSelected: _selectExchange,
+              ),
+              Expanded(
+                child: PageView.builder(
+                  controller: _pageController,
+                  itemCount: _tabs.length,
+                  onPageChanged: (index) {
+                    setState(() => _exchangeIndex = index);
+                  },
+                  itemBuilder: (context, index) {
+                    return _ExchangeEventsPane(
+                      exchange: _tabs[index],
+                      service: _service,
+                      opportunities: _opportunities,
+                      searchQuery: _searchQuery,
+                      active: index == _exchangeIndex,
+                    );
+                  },
                 ),
-                Expanded(
-                  child: PageView.builder(
-                    controller: _pageController,
-                    itemCount: _tabs.length,
-                    onPageChanged: (index) {
-                      setState(() => _exchangeIndex = index);
-                    },
-                    itemBuilder: (context, index) {
-                      return _ExchangeEventsPane(
-                        exchange: _tabs[index],
-                        service: _service,
-                        opportunities: _opportunities,
-                        searchQuery: _searchQuery,
-                      );
-                    },
-                  ),
-                ),
-              ],
-            )
-          : const EarningScreen(),
+              ),
+            ],
+          ),
+        HomeSection.contests => _TradingContestsPane(
+            opportunities: _opportunities,
+            searchQuery: _searchQuery,
+            active: true,
+          ),
+        HomeSection.earning => const EarningScreen(),
+      },
     );
   }
 }
@@ -286,7 +310,7 @@ class _ExchangePillBar extends StatelessWidget {
             for (var i = 0; i < exchanges.length; i++) ...[
               if (i > 0) const SizedBox(width: 8),
               _ExchangePill(
-                label: exchanges[i].labelKo,
+                label: AppLocalizations.of(context).exchangeName(exchanges[i]),
                 selected: i == selectedIndex,
                 onTap: () => onSelected(i),
               ),
@@ -333,18 +357,275 @@ class _ExchangePill extends StatelessWidget {
   }
 }
 
+class _TradingContestsPane extends StatefulWidget {
+  const _TradingContestsPane({
+    required this.opportunities,
+    required this.searchQuery,
+    required this.active,
+  });
+
+  final OpportunityRepository opportunities;
+  final String searchQuery;
+  final bool active;
+
+  @override
+  State<_TradingContestsPane> createState() => _TradingContestsPaneState();
+}
+
+class _TradingContestsPaneState extends State<_TradingContestsPane>
+    with AutomaticKeepAliveClientMixin {
+  List<Opportunity> _items = const [];
+  OpportunitySort _sort = OpportunitySort.endingSoon;
+  Object? _error;
+  bool _loading = false;
+  bool _started = false;
+
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.active) {
+      _startLoad();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _TradingContestsPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !oldWidget.active) {
+      _startLoad();
+    }
+  }
+
+  Future<void> _startLoad({bool forceRefresh = false}) async {
+    if (_started && !forceRefresh) return;
+    _started = true;
+    await _load(forceRefresh: forceRefresh);
+  }
+
+  Future<void> _load({bool forceRefresh = false}) async {
+    setState(() {
+      _error = null;
+      if (_items.isEmpty) _loading = true;
+    });
+
+    try {
+      final items = await widget.opportunities.forType(
+        OpportunityType.tradingContest,
+        forceRefresh: forceRefresh,
+      );
+      if (!mounted) return;
+      setState(() {
+        _items = items;
+        _loading = false;
+        _error = null;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e;
+        _loading = false;
+      });
+    }
+  }
+
+  List<Opportunity> _filtered(AppLocalizations l10n) {
+    final query = widget.searchQuery.trim().toLowerCase();
+    var list = _items.where((o) {
+      if (query.isEmpty) return true;
+      return o.titleKo.toLowerCase().contains(query) ||
+          o.rewardLabel.toLowerCase().contains(query) ||
+          o.eligibilityKo.toLowerCase().contains(query) ||
+          l10n.exchangeNameFor(o.exchange).toLowerCase().contains(query);
+    }).toList();
+
+    switch (_sort) {
+      case OpportunitySort.endingSoon:
+        list.sort((a, b) {
+          final ae = a.endsAt;
+          final be = b.endsAt;
+          if (ae == null && be == null) {
+            return a.titleKo.compareTo(b.titleKo);
+          }
+          if (ae == null) return 1;
+          if (be == null) return -1;
+          return ae.compareTo(be);
+        });
+      case OpportunitySort.newest:
+        list.sort((a, b) {
+          final aa =
+              a.asOf ?? a.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          final bb =
+              b.asOf ?? b.reviewedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
+          return bb.compareTo(aa);
+        });
+    }
+    return list;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    final l10n = AppLocalizations.of(context);
+
+    if (!_started) return const SizedBox.shrink();
+
+    if (_loading && _items.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const CircularProgressIndicator(color: AppColors.brand),
+            const SizedBox(height: 16),
+            Text(l10n.loadingEvents),
+          ],
+        ),
+      );
+    }
+
+    if (_error != null && _items.isEmpty) {
+      return _ErrorView(
+        message: _error.toString(),
+        onRetry: () => _startLoad(forceRefresh: true),
+      );
+    }
+
+    final items = _filtered(l10n);
+    final activeCount = items
+        .where(
+          (o) =>
+              o.status == OpportunityStatus.live ||
+              o.status == OpportunityStatus.endingSoon,
+        )
+        .length;
+
+    return RefreshIndicator(
+      color: AppColors.brand,
+      onRefresh: () => _startLoad(forceRefresh: true),
+      child: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
+          const _ContestsHubBanner(),
+          if (_items.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppColors.contentInset,
+                16,
+                AppColors.contentInset,
+                8,
+              ),
+              child: Text(
+                l10n.noContests,
+                style: const TextStyle(color: AppColors.muted, height: 1.4),
+              ),
+            )
+          else ...[
+            _ListToolbar(
+              count: activeCount,
+              sort: _sort,
+              onSortChanged: (sort) => setState(() => _sort = sort),
+            ),
+            if (items.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
+                  AppColors.contentInset,
+                  16,
+                  AppColors.contentInset,
+                  8,
+                ),
+                child: Text(
+                  l10n.noMatchingItems,
+                  style: const TextStyle(color: AppColors.muted),
+                ),
+              )
+            else
+              for (final item in items)
+                OpportunityCard(
+                  key: ValueKey(item.id),
+                  opportunity: item,
+                ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ContestsHubBanner extends StatelessWidget {
+  const _ContestsHubBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(
+        AppColors.contentInset,
+        12,
+        AppColors.contentInset,
+        4,
+      ),
+      child: Container(
+        constraints: const BoxConstraints(minHeight: 120),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              AppColors.bannerStart,
+              AppColors.bannerMid,
+              AppColors.bannerEnd,
+            ],
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.contestsHubTitle,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 22,
+                  fontWeight: FontWeight.w800,
+                  height: 1.25,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                l10n.contestsHubBody,
+                style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.88),
+                  fontSize: 14,
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ExchangeEventsPane extends StatefulWidget {
   const _ExchangeEventsPane({
     required this.exchange,
     required this.service,
     required this.opportunities,
     required this.searchQuery,
+    required this.active,
   });
 
   final Exchange exchange;
   final ExchangeEventsService service;
   final OpportunityRepository opportunities;
   final String searchQuery;
+  final bool active;
 
   @override
   State<_ExchangeEventsPane> createState() => _ExchangeEventsPaneState();
@@ -357,8 +638,12 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
   OpportunityType? _typeFilter;
   OpportunitySort _sort = OpportunitySort.endingSoon;
   Object? _error;
-  bool _loading = true;
-  bool _refreshing = false;
+  bool _loading = false;
+  bool _loadingMore = false;
+  bool _started = false;
+  late final ScrollController _scrollController;
+  /// Footer-only updates (avoid rebuilding every card while loading more).
+  late final ValueNotifier<bool> _footerLoadingMore;
 
   @override
   bool get wantKeepAlive => true;
@@ -366,7 +651,77 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
   @override
   void initState() {
     super.initState();
-    _load();
+    _footerLoadingMore = ValueNotifier(false);
+    _scrollController = ScrollController()..addListener(_onScroll);
+    if (widget.active) {
+      _startLoad();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _ExchangeEventsPane oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.active && !oldWidget.active) {
+      _startLoad();
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController
+      ..removeListener(_onScroll)
+      ..dispose();
+    _footerLoadingMore.dispose();
+    super.dispose();
+  }
+
+  void _setFooterLoadingMore(bool value) {
+    _loadingMore = value;
+    if (_footerLoadingMore.value != value) {
+      _footerLoadingMore.value = value;
+    }
+  }
+
+  Future<void> _startLoad({bool forceRefresh = false}) async {
+    if (_started && !forceRefresh) return;
+    _started = true;
+    await _load(forceRefresh: forceRefresh);
+  }
+
+  void _onScroll() {
+    if (!_scrollController.hasClients) return;
+    if (_loading || _loadingMore) return;
+    final position = _scrollController.position;
+    if (!position.hasContentDimensions) return;
+    // Short lists (maxScrollExtent ~= 0) would otherwise always trip load-more
+    // and loop forever when an API repeats the same page (Bitget).
+    if (position.maxScrollExtent <= 0) return;
+    if (position.pixels < position.maxScrollExtent - 480) return;
+    _loadMore();
+  }
+
+  /// Applying list updates mid-fling makes iOS bounce/jump the viewport upward.
+  Future<void> _waitForScrollIdle() async {
+    if (!_scrollController.hasClients) return;
+    final scrolling = _scrollController.position.isScrollingNotifier;
+    if (!scrolling.value) return;
+
+    final done = Completer<void>();
+    void listener() {
+      if (!scrolling.value && !done.isCompleted) {
+        done.complete();
+      }
+    }
+
+    scrolling.addListener(listener);
+    try {
+      await Future.any([
+        done.future,
+        Future<void>.delayed(const Duration(milliseconds: 900)),
+      ]);
+    } finally {
+      scrolling.removeListener(listener);
+    }
   }
 
   Future<void> _load({bool forceRefresh = false}) async {
@@ -374,25 +729,23 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
       _error = null;
       if (_data == null && _allForExchange.isEmpty) {
         _loading = true;
-      } else {
-        _refreshing = true;
       }
     });
 
-    try {
-      final opps = await widget.opportunities.forExchange(widget.exchange);
-      if (mounted) {
-        setState(() {
-          _allForExchange = opps;
-          _loading = false;
-        });
-      }
-    } catch (_) {}
+    final oppsFuture = widget.opportunities.forExchange(widget.exchange).then((
+      opps,
+    ) {
+      if (!mounted) return;
+      setState(() {
+        _allForExchange = opps;
+        if (_data != null) _loading = false;
+      });
+    }).catchError((_) {});
 
     try {
       final result = await widget.service.loadEvents(
         widget.exchange,
-        limit: 20,
+        limit: ExchangeEventFetchers.defaultPageSize,
         forceRefresh: forceRefresh,
         onCache: (cached) {
           if (!mounted) return;
@@ -406,7 +759,6 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
       setState(() {
         _data = result;
         _loading = false;
-        _refreshing = false;
         _error = null;
       });
     } catch (e) {
@@ -414,8 +766,52 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
       setState(() {
         _error = e;
         _loading = false;
-        _refreshing = false;
       });
+    }
+
+    await oppsFuture;
+    if (mounted && _loading) {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _loadMore() async {
+    final current = _data;
+    if (current == null ||
+        _loading ||
+        _loadingMore ||
+        !current.hasMore ||
+        current.items.length >= ExchangeEventFetchers.maxItems) {
+      return;
+    }
+
+    _setFooterLoadingMore(true);
+    try {
+      final result = await widget.service.loadMoreEvents(
+        widget.exchange,
+        current: current.items,
+        nextPage: current.page + 1,
+      );
+      if (!mounted) return;
+      await _waitForScrollIdle();
+      if (!mounted) return;
+      final keepPixels = _scrollController.hasClients
+          ? _scrollController.position.pixels
+          : null;
+      setState(() {
+        _data = result;
+      });
+      _setFooterLoadingMore(false);
+      if (keepPixels != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted || !_scrollController.hasClients) return;
+          final max = _scrollController.position.maxScrollExtent;
+          _scrollController.jumpTo(keepPixels.clamp(0.0, max));
+        });
+      }
+    } catch (_) {
+      if (!mounted) return;
+      _setFooterLoadingMore(false);
     }
   }
 
@@ -424,14 +820,16 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
     final query = widget.searchQuery.trim().toLowerCase();
     if (query.isEmpty) return items;
     return items
-        .where((e) =>
-            e.displayTitle.toLowerCase().contains(query) ||
-            e.displayDescription.toLowerCase().contains(query) ||
-            e.displayTags.any((t) => t.toLowerCase().contains(query)))
+        .where(
+          (e) =>
+              e.displayTitle.toLowerCase().contains(query) ||
+              e.displayDescription.toLowerCase().contains(query) ||
+              e.displayTags.any((t) => t.toLowerCase().contains(query)),
+        )
         .toList();
   }
 
-  List<Opportunity> get _filteredOpportunities {
+  List<Opportunity> _filteredOpportunities(AppLocalizations l10n) {
     if (_typeFilter == OpportunityType.event) return const [];
     final query = widget.searchQuery.trim().toLowerCase();
     var list = _allForExchange.where((o) {
@@ -440,7 +838,7 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
       return o.titleKo.toLowerCase().contains(query) ||
           o.rewardLabel.toLowerCase().contains(query) ||
           o.eligibilityKo.toLowerCase().contains(query) ||
-          o.type.labelKo.toLowerCase().contains(query);
+          l10n.opportunityTypeLabel(o.type).toLowerCase().contains(query);
     }).toList();
 
     switch (_sort) {
@@ -483,38 +881,26 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
   @override
   Widget build(BuildContext context) {
     super.build(context);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.page,
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'refresh_${widget.exchange.name}',
-        backgroundColor: AppColors.brand,
-        foregroundColor: Colors.white,
-        tooltip: '새로고침',
-        onPressed: _refreshing ? null : () => _load(forceRefresh: true),
-        child: _refreshing
-            ? const SizedBox(
-                width: 18,
-                height: 18,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  color: Colors.white,
-                ),
-              )
-            : const Icon(Icons.refresh),
-      ),
-      body: _buildBody(),
+      body: _buildBody(l10n),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildBody(AppLocalizations l10n) {
+    if (!_started) {
+      return const SizedBox.shrink();
+    }
+
     if (_loading && _data == null && _allForExchange.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            CircularProgressIndicator(color: AppColors.brand),
-            SizedBox(height: 16),
-            Text('이벤트 불러오는 중…'),
+            const CircularProgressIndicator(color: AppColors.brand),
+            const SizedBox(height: 16),
+            Text(l10n.loadingEvents),
           ],
         ),
       );
@@ -525,28 +911,34 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
         (_data == null || _data!.items.isEmpty)) {
       return _ErrorView(
         message: _error.toString(),
-        onRetry: () => _load(forceRefresh: true),
+        onRetry: () => _startLoad(forceRefresh: true),
       );
     }
 
     final notices = _showNotices ? _notices : const <ExchangeEvent>[];
-    final opportunities = _filteredOpportunities;
-    final hasFeed = _allForExchange.isNotEmpty || (_data?.items.isNotEmpty ?? false);
+    final opportunities = _filteredOpportunities(l10n);
+    final hasFeed =
+        _allForExchange.isNotEmpty || (_data?.items.isNotEmpty ?? false);
     final activeCount = _typeFilter == OpportunityType.event
         ? notices.length
         : opportunities
-                .where((o) =>
-                    o.status == OpportunityStatus.live ||
-                    o.status == OpportunityStatus.endingSoon)
-                .length +
-            (_typeFilter == null ? notices.length : 0);
+                  .where(
+                    (o) =>
+                        o.status == OpportunityStatus.live ||
+                        o.status == OpportunityStatus.endingSoon,
+                  )
+                  .length +
+              (_typeFilter == null ? notices.length : 0);
 
     return RefreshIndicator(
       color: AppColors.brand,
-      onRefresh: () => _load(forceRefresh: true),
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: 88),
-        children: [
+      onRefresh: () => _startLoad(forceRefresh: true),
+      child: Scrollbar(
+        controller: _scrollController,
+        child: ListView(
+          controller: _scrollController,
+          padding: const EdgeInsets.only(bottom: 24),
+          children: [
           ExchangeBanner(exchange: widget.exchange),
           if (hasFeed) ...[
             _TypeChipBar(
@@ -560,42 +952,70 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
               onSortChanged: (sort) => setState(() => _sort = sort),
             ),
             if (opportunities.isEmpty && notices.isEmpty)
-              const Padding(
-                padding: EdgeInsets.fromLTRB(
+              Padding(
+                padding: const EdgeInsets.fromLTRB(
                   AppColors.contentInset,
                   16,
                   AppColors.contentInset,
                   8,
                 ),
                 child: Text(
-                  '조건에 맞는 항목이 없습니다.',
-                  style: TextStyle(color: AppColors.muted),
+                  l10n.noMatchingItems,
+                  style: const TextStyle(color: AppColors.muted),
                 ),
               )
             else ...[
               for (final item in opportunities)
-                OpportunityCard(opportunity: item),
+                OpportunityCard(
+                  key: ValueKey(item.id),
+                  opportunity: item,
+                ),
               for (final event in notices)
                 EventCard(
+                  key: ValueKey(event.url),
                   event: event,
                   service: widget.service,
                   exchange: widget.exchange,
                 ),
+              // Fixed-height sentinel so load-more spinner/text doesn't
+              // change scroll extent mid-fling (iOS jump-back).
+              if ((_data?.hasMore ?? false) || _loadingMore)
+                ValueListenableBuilder<bool>(
+                  valueListenable: _footerLoadingMore,
+                  builder: (context, loadingMore, _) {
+                    return SizedBox(
+                      height: 72,
+                      child: Center(
+                        child: loadingMore
+                            ? const SizedBox(
+                                width: 22,
+                                height: 22,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: AppColors.brand,
+                                ),
+                              )
+                            : const SizedBox.shrink(),
+                      ),
+                    );
+                  },
+                ),
             ],
           ] else
-            const Padding(
-              padding: EdgeInsets.fromLTRB(
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
                 AppColors.contentInset,
                 8,
                 AppColors.contentInset,
                 8,
               ),
               child: Text(
-                '표시할 이벤트가 없습니다.',
-                style: TextStyle(color: AppColors.muted, height: 1.4),
+                l10n.noEvents,
+                style: const TextStyle(color: AppColors.muted, height: 1.4),
               ),
             ),
         ],
+        ),
       ),
     );
   }
@@ -614,7 +1034,8 @@ class _TypeChipBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Keep 이벤트 immediately after 전체, then remaining types.
+    final l10n = AppLocalizations.of(context);
+    // Keep Event immediately after All, then remaining types.
     final types = <OpportunityType>[
       if (available.contains(OpportunityType.event)) OpportunityType.event,
       ...OpportunityType.values.where(
@@ -633,14 +1054,14 @@ class _TypeChipBar extends StatelessWidget {
       child: Row(
         children: [
           _GuideChip(
-            label: '전체',
+            label: l10n.filterAll,
             selected: selected == null,
             onTap: () => onSelected(null),
           ),
           for (final type in types) ...[
             const SizedBox(width: 8),
             _GuideChip(
-              label: type.labelKo,
+              label: l10n.opportunityTypeLabel(type),
               selected: selected == type,
               onTap: () => onSelected(selected == type ? null : type),
             ),
@@ -714,6 +1135,7 @@ class _ListToolbar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppColors.contentInset,
@@ -724,7 +1146,7 @@ class _ListToolbar extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            '$count개 진행 중',
+            l10n.activeCount(count),
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w800,
@@ -735,14 +1157,14 @@ class _ListToolbar extends StatelessWidget {
           PopupMenuButton<OpportunitySort>(
             initialValue: sort,
             onSelected: onSortChanged,
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: OpportunitySort.newest,
-                child: Text('최신순'),
+                child: Text(l10n.sortNewest),
               ),
               PopupMenuItem(
                 value: OpportunitySort.endingSoon,
-                child: Text('마감 임박순'),
+                child: Text(l10n.sortEndingSoon),
               ),
             ],
             child: Padding(
@@ -750,7 +1172,9 @@ class _ListToolbar extends StatelessWidget {
               child: Row(
                 children: [
                   Text(
-                    sort == OpportunitySort.newest ? '최신순' : '마감 임박순',
+                    sort == OpportunitySort.newest
+                        ? l10n.sortNewest
+                        : l10n.sortEndingSoon,
                     style: const TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -780,6 +1204,7 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -788,16 +1213,15 @@ class _ErrorView extends StatelessWidget {
           children: [
             const Icon(Icons.cloud_off, size: 48, color: AppColors.muted),
             const SizedBox(height: 12),
-            const Text(
-              '이벤트를 불러오지 못했습니다.',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            Text(
+              l10n.eventsLoadFailed,
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             const SizedBox(height: 8),
-            const Text(
-              '프록시 서버가 실행 중인지 확인하세요.\n'
-              'cd server && dart run bin/server.dart',
+            Text(
+              l10n.networkRetryHint,
               textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.muted),
+              style: const TextStyle(color: AppColors.muted),
             ),
             const SizedBox(height: 12),
             Text(
@@ -810,7 +1234,7 @@ class _ErrorView extends StatelessWidget {
               onPressed: onRetry,
               style: FilledButton.styleFrom(backgroundColor: AppColors.brand),
               icon: const Icon(Icons.refresh),
-              label: const Text('다시 시도'),
+              label: Text(l10n.retry),
             ),
           ],
         ),

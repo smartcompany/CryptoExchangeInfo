@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_labels.dart';
 import '../models/exchange_event.dart';
+import '../services/ad_gate.dart';
+import '../services/event_ai_service.dart';
 import '../services/exchange_events_service.dart';
 import '../theme/app_colors.dart';
+import 'ai_summary_button.dart';
+import 'event_ai_sheet.dart';
 
 class EventCard extends StatefulWidget {
   const EventCard({
@@ -26,8 +32,9 @@ class _EventCardState extends State<EventCard> {
   static final _dateFormat = DateFormat('yyyy.MM.dd');
 
   String? _imageUrl;
-  var _fetchingImage = false;
   var _imageFailed = false;
+  var _imageRequestInFlight = false;
+  var _analyzing = false;
 
   ExchangeEvent get event => widget.event;
 
@@ -48,17 +55,16 @@ class _EventCardState extends State<EventCard> {
 
   void _bootstrapImage() {
     _imageFailed = false;
+    _imageRequestInFlight = false;
     final cached = widget.service.displayImageUrl(event.imageUrl);
     _imageUrl = cached;
-    if (_imageUrl == null) {
+    if (_imageUrl == null && event.url.trim().isNotEmpty) {
       _loadImage();
-    } else {
-      _fetchingImage = false;
     }
   }
 
   Future<void> _loadImage() async {
-    if (_fetchingImage || event.url.trim().isEmpty) return;
+    if (_imageRequestInFlight || event.url.trim().isEmpty) return;
     Exchange? resolved = widget.exchange;
     if (resolved == null) {
       for (final value in Exchange.values) {
@@ -68,9 +74,12 @@ class _EventCardState extends State<EventCard> {
         }
       }
     }
-    if (resolved == null) return;
+    if (resolved == null) {
+      if (mounted) setState(() => _imageFailed = true);
+      return;
+    }
 
-    setState(() => _fetchingImage = true);
+    _imageRequestInFlight = true;
     try {
       final imageUrl = await widget.service.fetchEventImage(
         exchange: resolved,
@@ -79,22 +88,23 @@ class _EventCardState extends State<EventCard> {
       if (!mounted) return;
       setState(() {
         _imageUrl = imageUrl;
-        _fetchingImage = false;
         _imageFailed = imageUrl == null;
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() {
-        _fetchingImage = false;
-        _imageFailed = true;
-      });
+      setState(() => _imageFailed = true);
+    } finally {
+      _imageRequestInFlight = false;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final period = _periodLabel();
+    final l10n = AppLocalizations.of(context);
+    final period = _periodLabel(l10n);
+    // Hide the media slot entirely when missing / 403 / failed — empty gray
+    // blocks look worse than a text-only card.
     final showThumb = _imageUrl != null && !_imageFailed;
 
     return Card(
@@ -132,24 +142,13 @@ class _EventCardState extends State<EventCard> {
                   errorBuilder: (context, error, stackTrace) {
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       if (!mounted || _imageFailed) return;
-                      setState(() => _imageFailed = true);
+                      setState(() {
+                        _imageFailed = true;
+                        _imageUrl = null;
+                      });
                     });
                     return const SizedBox.shrink();
                   },
-                ),
-              )
-            else if (_fetchingImage)
-              AspectRatio(
-                aspectRatio: 16 / 9,
-                child: ColoredBox(
-                  color: theme.colorScheme.surfaceContainerHighest,
-                  child: const Center(
-                    child: SizedBox(
-                      width: 24,
-                      height: 24,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    ),
-                  ),
                 ),
               ),
             Padding(
@@ -161,35 +160,23 @@ class _EventCardState extends State<EventCard> {
                     spacing: 6,
                     runSpacing: 6,
                     children: [
-                      Chip(
-                        label: Text(
-                          widget.exchange?.labelKo ?? '이벤트',
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                        visualDensity: VisualDensity.compact,
-                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        padding: EdgeInsets.zero,
-                        labelPadding:
-                            const EdgeInsets.symmetric(horizontal: 10),
+                      _TagPill(
+                        label: widget.exchange != null
+                            ? l10n.exchangeName(widget.exchange!)
+                            : l10n.typeEvent,
+                        foreground: AppColors.brand,
+                        background: AppColors.brandSoft,
                       ),
                       for (final tag in event.displayTags.take(2))
-                        Chip(
-                          label:
-                              Text(tag, style: const TextStyle(fontSize: 14)),
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
-                          padding: EdgeInsets.zero,
-                          labelPadding:
-                              const EdgeInsets.symmetric(horizontal: 10),
+                        _TagPill(
+                          label: l10n.eventTag(tag),
+                          foreground: AppColors.muted,
+                          background: AppColors.chipIdle,
                         ),
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    event.displayTitle,
-                    style: theme.textTheme.titleMedium,
-                  ),
+                  Text(event.displayTitle, style: theme.textTheme.titleMedium),
                   if (event.displayDescription.isNotEmpty) ...[
                     const SizedBox(height: 10),
                     Text(
@@ -223,19 +210,24 @@ class _EventCardState extends State<EventCard> {
                       ],
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton.icon(
-                      onPressed: () => _openExternal(context),
-                      icon: const Icon(Icons.open_in_new, size: 18),
-                      label: Text(
-                        '원문 보기',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: AiSummaryButton(
+                          busy: _analyzing,
+                          onPressed: _analyzing ? null : _runAi,
                         ),
                       ),
-                    ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 4,
+                        child: OfficialLinkButton(
+                          onPressed: () => _openExternal(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -246,36 +238,95 @@ class _EventCardState extends State<EventCard> {
     );
   }
 
-  String? _periodLabel() {
+  String? _periodLabel(AppLocalizations l10n) {
     final start = event.startAt;
     final end = event.endAt;
     if (start == null && end == null) {
       final published = event.publishedAt;
       if (published == null) return null;
-      return '게시 ${_dateFormat.format(published)}';
+      return l10n.publishedAt(_dateFormat.format(published));
     }
     final startText = start != null ? _dateFormat.format(start) : '?';
     final endText = end != null ? _dateFormat.format(end) : '?';
-    return '기간 $startText ~ $endText';
+    return l10n.periodRange(startText, endText, '');
+  }
+
+  Future<void> _runAi() async {
+    if (_analyzing) return;
+    final confirmed = await AdGate.confirmAndShowAdForAi(context);
+    if (!confirmed || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+
+    setState(() => _analyzing = true);
+    try {
+      final analysis = await EventAiService().analyze(event);
+      if (!mounted) return;
+      await presentEventAiAnalysis(
+        context,
+        analysis: analysis,
+        sourceUrl: event.url,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('[EventCard] AI analysis failed: $error');
+      debugPrint('$stackTrace');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.aiFailed(error.toString()))));
+    } finally {
+      if (mounted) setState(() => _analyzing = false);
+    }
   }
 
   Future<void> _openExternal(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final uri = Uri.tryParse(event.url.trim());
     if (uri == null ||
         (uri.scheme != 'http' && uri.scheme != 'https') ||
         uri.host.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('유효한 링크가 없습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.invalidLink)));
       }
       return;
     }
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('링크를 열 수 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.cannotOpenLink)));
     }
+  }
+}
+
+class _TagPill extends StatelessWidget {
+  const _TagPill({
+    required this.label,
+    required this.foreground,
+    required this.background,
+  });
+
+  final String label;
+  final Color foreground;
+  final Color background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: foreground,
+        ),
+      ),
+    );
   }
 }

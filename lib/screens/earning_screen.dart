@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../services/earn_service.dart';
 import '../widgets/earn_product_card.dart';
 
@@ -30,18 +31,19 @@ class _EarningScreenState extends State<EarningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: FutureBuilder<FlexibleUsdtEarnResult>(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(
+            return Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Flexible USDT Earn 불러오는 중…'),
+                  const CircularProgressIndicator(),
+                  const SizedBox(height: 16),
+                  Text(l10n.loadingEarn),
                 ],
               ),
             );
@@ -54,7 +56,7 @@ class _EarningScreenState extends State<EarningScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Earn 정보를 불러오지 못했습니다.'),
+                    Text(l10n.earnLoadFailed),
                     const SizedBox(height: 8),
                     Text(
                       snapshot.error.toString(),
@@ -65,7 +67,7 @@ class _EarningScreenState extends State<EarningScreen> {
                     FilledButton.icon(
                       onPressed: _reload,
                       icon: const Icon(Icons.refresh),
-                      label: const Text('다시 시도'),
+                      label: Text(l10n.retry),
                     ),
                   ],
                 ),
@@ -75,7 +77,7 @@ class _EarningScreenState extends State<EarningScreen> {
 
           final data = snapshot.data;
           if (data == null || data.items.isEmpty) {
-            return const Center(child: Text('표시할 Earn 상품이 없습니다.'));
+            return Center(child: Text(l10n.noEarnProducts));
           }
 
           return RefreshIndicator(
@@ -91,19 +93,20 @@ class _EarningScreenState extends State<EarningScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Flexible USDT',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          l10n.earnHeroTitle,
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
                               ),
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          '거래소별 유연(Flexible) USDT 거치 금리입니다. '
-                          '구간·시점에 따라 실효 금리가 달라질 수 있습니다.',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
+                          l10n.earnHeroBody,
+                          style: Theme.of(context).textTheme.bodyMedium
+                              ?.copyWith(
+                                color: Theme.of(
+                                  context,
+                                ).colorScheme.onSurfaceVariant,
                               ),
                         ),
                       ],
@@ -115,12 +118,6 @@ class _EarningScreenState extends State<EarningScreen> {
             ),
           );
         },
-      ),
-      floatingActionButton: FloatingActionButton.small(
-        heroTag: 'earn_refresh',
-        tooltip: '새로고침',
-        onPressed: _reload,
-        child: const Icon(Icons.refresh),
       ),
     );
   }

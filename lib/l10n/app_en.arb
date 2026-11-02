@@ -1,0 +1,207 @@
+{
+  "@@locale": "en",
+  "appTitle": "Exora",
+  "sectionEvents": "Exchange events",
+  "sectionEarning": "Earning (Flexible USDT)",
+  "sectionEarningShort": "Flexible USDT",
+  "menuSelect": "Choose a menu",
+  "searchEventsHint": "Search events",
+  "searchTooltip": "Search",
+  "searchCloseTooltip": "Close search",
+  "notificationsTooltip": "Notifications",
+  "notificationsComingSoon": "Notifications are coming soon.",
+  "refreshTooltip": "Refresh",
+  "loadingEvents": "Loading events…",
+  "loadingEarn": "Loading Flexible USDT Earn…",
+  "noMatchingItems": "No items match your filters.",
+  "noEvents": "No events to show.",
+  "noEarnProducts": "No Earn products to show.",
+  "eventsLoadFailed": "Couldn't load events.",
+  "earnLoadFailed": "Couldn't load Earn info.",
+  "networkRetryHint": "Check your connection and try again.",
+  "retry": "Try again",
+  "filterAll": "All",
+  "sortNewest": "Newest",
+  "sortEndingSoon": "Ending soon",
+  "exchangeBybit": "Bybit",
+  "exchangeBinance": "Binance",
+  "exchangeOkx": "OKX",
+  "exchangeUpbit": "Upbit",
+  "exchangeBithumb": "Bithumb",
+  "exchangeBitget": "Bitget",
+  "typeEvent": "Event",
+  "typeTradingContest": "Trading contest",
+  "contestsHubTitle": "Trading contests",
+  "contestsHubBody": "Compare live contests across exchanges in one feed.",
+  "noContests": "No trading contests to show.",
+  "typeEarnBoost": "Earn boost",
+  "typeDepositBonus": "Deposit bonus",
+  "typeConvertChallenge": "Convert",
+  "typeDualChallenge": "Dual",
+  "typeFeePromo": "Fees",
+  "typeListing": "Listing",
+  "typeOther": "Other",
+  "statusUpcoming": "Upcoming",
+  "statusLive": "Live",
+  "statusEndingSoon": "Ending soon",
+  "statusEnded": "Ended",
+  "endingSoonBadge": "Ending soon",
+  "rewardLabel": "Reward {value}",
+  "@rewardLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "deadlineLabel": "Ends {value}",
+  "@deadlineLabel": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "periodRange": "Period {start} ~ {end}{suffix}",
+  "@periodRange": {
+    "placeholders": {
+      "start": {
+        "type": "String"
+      },
+      "end": {
+        "type": "String"
+      },
+      "suffix": {
+        "type": "String"
+      }
+    }
+  },
+  "publishedAt": "Posted {date}",
+  "@publishedAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "closed": "Closed",
+  "detailReward": "Reward",
+  "detailType": "Type",
+  "detailStatus": "Status",
+  "detailStart": "Starts",
+  "detailEnd": "Ends",
+  "detailEligibility": "Eligibility",
+  "detailRegion": "Region",
+  "detailTasks": "How to join",
+  "detailAsOf": "As of {date} · Not investment advice · Prefer the original terms",
+  "@detailAsOf": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "invalidLink": "No valid link.",
+  "cannotOpenLink": "Couldn't open the link.",
+  "cannotOpenEarnPage": "Couldn't open the Earn page.",
+  "aiSummary": "AI summary",
+  "aiAnalyzing": "Analyzing",
+  "aiEasyExplainTitle": "AI simple guide",
+  "aiDisclaimer": "Draft only — not investment advice. Prefer the original terms and rewards.",
+  "aiGoToSource": "Open original",
+  "aiSectionReward": "Reward",
+  "aiSectionPeriod": "Period",
+  "aiSectionConditions": "Requirements",
+  "aiSectionCautions": "Notes",
+  "aiFailed": "AI analysis failed: {error}",
+  "@aiFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "viewOriginal": "View original",
+  "adConfirmTitle": "AI summary",
+  "adConfirmMessage": "Watch an ad to unlock the AI summary. Continue?",
+  "cancel": "Cancel",
+  "adConfirmContinue": "Watch ad & continue",
+  "earnHeroTitle": "Flexible USDT",
+  "earnHeroBody": "Flexible USDT rates by exchange. Effective APR can vary by tier and timing.",
+  "earnMinAmount": "Min {amount} USDT",
+  "@earnMinAmount": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "earnMarketApr": "Market APR {value}",
+  "@earnMarketApr": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "earnOpenPage": "Open Earn page",
+  "earnUnavailableBitget": "Bitget Savings requires an API key.",
+  "earnUnavailableUpbit": "Upbit has no public Flexible USDT Earn API.",
+  "earnUnavailableBithumb": "Bithumb has no public Flexible USDT Earn API.",
+  "earnTierNote": "Applied APR may vary by balance tier.",
+  "bannerBybitTitle": "Trading campaigns",
+  "bannerBybitBody": "Catch the latest Bybit rewards and contests",
+  "bannerBinanceTitle": "Global event hub",
+  "bannerBinanceBody": "Browse Binance campaigns in one place",
+  "bannerOkxTitle": "Simple opportunity board",
+  "bannerOkxBody": "Campaigns and rewards, without the noise",
+  "bannerUpbitTitle": "Local notices & events",
+  "bannerUpbitBody": "Spot listing and event news quickly",
+  "bannerBithumbTitle": "Hot promotions",
+  "bannerBithumbBody": "A warm roundup of events and notices",
+  "bannerBitgetTitle": "Copy & event zone",
+  "bannerBitgetBody": "Rewards and campaigns, neon-clear",
+  "activeCount": "{count} live",
+  "earnUnsupported": "Unavailable",
+  "earnAprLabel": "Listed APR (Flexible)",
+  "earnAvgApr": "Avg {value}",
+  "earnPrevApr": " · Prev {value}",
+  "earnTierRates": "Tier rates",
+  "categoryNotice": "Notice",
+  "@activeCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@earnAvgApr": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "@earnPrevApr": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "exchangeGate": "Gate",
+  "exchangeMexc": "MEXC",
+  "exchangeKucoin": "KuCoin",
+  "exchangeCoinbase": "Coinbase",
+  "exchangeHtx": "HTX",
+  "bannerGateTitle": "Listings & campaigns",
+  "bannerGateBody": "Gate promotions and trading contests in one feed",
+  "bannerMexcTitle": "Event radar",
+  "bannerMexcBody": "Catch MEXC listings and zero-fee campaigns",
+  "bannerKucoinTitle": "KuCoin pulse",
+  "bannerKucoinBody": "Listings, earn boosts, and platform news",
+  "bannerCoinbaseTitle": "Exchange notices",
+  "bannerCoinbaseBody": "Status updates and scheduled maintenance",
+  "bannerHtxTitle": "HTX activities",
+  "bannerHtxBody": "Latest campaigns and platform rewards"
+}

@@ -2,19 +2,36 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_labels.dart';
 import '../models/opportunity.dart';
-import '../services/exchange_events_service.dart';
+import '../services/ad_gate.dart';
+import '../services/event_ai_service.dart';
+import '../services/opportunity_repository.dart';
+import '../services/translate_service.dart';
 import '../theme/app_colors.dart';
+import 'ai_summary_button.dart';
+import 'event_ai_sheet.dart';
 
-class OpportunityCard extends StatelessWidget {
+class OpportunityCard extends StatefulWidget {
   const OpportunityCard({super.key, required this.opportunity});
 
   final Opportunity opportunity;
 
   @override
+  State<OpportunityCard> createState() => _OpportunityCardState();
+}
+
+class _OpportunityCardState extends State<OpportunityCard> {
+  var _analyzing = false;
+
+  Opportunity get opportunity => widget.opportunity;
+
+  @override
   Widget build(BuildContext context) {
-    final exchangeLabel = _exchangeLabel(opportunity.exchange);
-    final dateLabel = _dateLabel();
+    final l10n = AppLocalizations.of(context);
+    final exchangeLabel = l10n.exchangeNameFor(opportunity.exchange);
+    final dateLabel = _dateLabel(l10n);
 
     return Padding(
       padding: const EdgeInsets.symmetric(
@@ -63,16 +80,18 @@ class OpportunityCard extends StatelessWidget {
                                   background: AppColors.brandSoft,
                                 ),
                                 _TagPill(
-                                  label: opportunity.type.labelKo,
+                                  label: l10n.opportunityTypeLabel(
+                                    opportunity.type,
+                                  ),
                                   foreground: AppColors.muted,
                                   background: AppColors.chipIdle,
                                 ),
                                 if (opportunity.status ==
                                     OpportunityStatus.endingSoon)
-                                  const _TagPill(
-                                    label: '곧 마감',
-                                    foreground: Color(0xFFB42318),
-                                    background: Color(0xFFFEE4E2),
+                                  _TagPill(
+                                    label: l10n.endingSoonBadge,
+                                    foreground: const Color(0xFFB42318),
+                                    background: const Color(0xFFFEE4E2),
                                   ),
                               ],
                             ),
@@ -117,7 +136,7 @@ class OpportunityCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
-                            '보상 ${opportunity.rewardLabel}',
+                            l10n.rewardLabel(opportunity.rewardLabel),
                             style: const TextStyle(
                               fontSize: 14,
                               fontWeight: FontWeight.w700,
@@ -142,28 +161,24 @@ class OpportunityCard extends StatelessWidget {
                       text: dateLabel,
                     ),
                   ],
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton(
-                      onPressed: () => _openOfficial(context),
-                      style: FilledButton.styleFrom(
-                        backgroundColor: AppColors.brand,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(999),
+                  const SizedBox(height: 14),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 6,
+                        child: AiSummaryButton(
+                          busy: _analyzing,
+                          onPressed: _analyzing ? null : _runAi,
                         ),
                       ),
-                      child: const Text(
-                        '원문 보기  ›',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        flex: 4,
+                        child: OfficialLinkButton(
+                          onPressed: () => _openOfficial(context),
                         ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
@@ -174,37 +189,86 @@ class OpportunityCard extends StatelessWidget {
     );
   }
 
-  String? _dateLabel() {
+  String? _dateLabel(AppLocalizations l10n) {
     final format = DateFormat('yyyy.MM.dd');
     final start = opportunity.startsAt;
     final end = opportunity.endsAt;
+    final days = opportunity.daysRemaining;
+    final dDay = days == null ? null : l10n.dDayLabel(days);
     if (start == null && end == null) {
-      final dDay = opportunity.dDayLabel;
-      return dDay == null ? null : '마감 $dDay';
+      return dDay == null ? null : l10n.deadlineLabel(dDay);
     }
     final startText = start != null ? format.format(start.toLocal()) : '?';
     final endText = end != null ? format.format(end.toLocal()) : '?';
-    final dDay = opportunity.dDayLabel;
     final suffix = dDay == null ? '' : ' · $dDay';
-    return '기간 $startText ~ $endText$suffix';
+    return l10n.periodRange(startText, endText, suffix);
   }
 
-  String _exchangeLabel(String exchange) {
-    for (final value in Exchange.values) {
-      if (value.name == exchange) return value.labelKo;
+  Future<void> _runAi() async {
+    if (_analyzing) return;
+    final confirmed = await AdGate.confirmAndShowAdForAi(context);
+    if (!confirmed || !mounted) return;
+    final l10n = AppLocalizations.of(context);
+
+    setState(() => _analyzing = true);
+    try {
+      final analysis = await EventAiService().analyzeOpportunity(opportunity);
+      if (!mounted) return;
+      await presentEventAiAnalysis(
+        context,
+        analysis: analysis,
+        sourceUrl: opportunity.officialUrl,
+      );
+    } catch (error, stackTrace) {
+      debugPrint('[OpportunityCard] AI analysis failed: $error');
+      debugPrint('$stackTrace');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.aiFailed(error.toString()))));
+    } finally {
+      if (mounted) setState(() => _analyzing = false);
     }
-    return exchange;
   }
 
   Future<void> _showDetail(BuildContext context) async {
     final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
     final dateFormat = DateFormat('yyyy.MM.dd HH:mm');
+    final locale = TranslateService.normalizeLang(
+      Localizations.localeOf(context).languageCode,
+    );
+
+    // Always localize for the open sheet so detail never stays stuck in Korean
+    // when the list cache still has raw pilot JSON strings.
+    var detail = opportunity;
+    if (locale != 'ko') {
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(
+          child: CircularProgressIndicator(color: AppColors.brand),
+        ),
+      );
+      try {
+        detail = await OpportunityRepository().localize(
+          opportunity,
+          locale: locale,
+        );
+      } finally {
+        if (context.mounted) {
+          Navigator.of(context, rootNavigator: true).pop();
+        }
+      }
+      if (!context.mounted) return;
+    }
+
     await showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
       backgroundColor: AppColors.card,
-      builder: (context) {
+      builder: (sheetContext) {
         return SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
@@ -212,48 +276,63 @@ class OpportunityCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  opportunity.titleKo,
+                  detail.titleKo,
                   style: theme.textTheme.titleLarge?.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                if (opportunity.summaryKo.isNotEmpty) ...[
+                if (detail.summaryKo.isNotEmpty) ...[
                   const SizedBox(height: 10),
                   Text(
-                    opportunity.summaryKo,
+                    detail.summaryKo,
                     style: theme.textTheme.bodyLarge?.copyWith(
                       color: AppColors.muted,
                     ),
                   ),
                 ],
                 const SizedBox(height: 16),
-                _DetailRow(label: '보상', value: opportunity.rewardLabel),
-                _DetailRow(label: '유형', value: opportunity.type.labelKo),
-                _DetailRow(label: '상태', value: opportunity.status.labelKo),
-                if (opportunity.startsAt != null)
+                _DetailRow(
+                  label: l10n.detailReward,
+                  value: detail.rewardLabel,
+                ),
+                _DetailRow(
+                  label: l10n.detailType,
+                  value: l10n.opportunityTypeLabel(detail.type),
+                ),
+                _DetailRow(
+                  label: l10n.detailStatus,
+                  value: l10n.opportunityStatusLabel(detail.status),
+                ),
+                if (detail.startsAt != null)
                   _DetailRow(
-                    label: '시작',
-                    value: dateFormat.format(opportunity.startsAt!.toLocal()),
+                    label: l10n.detailStart,
+                    value: dateFormat.format(detail.startsAt!.toLocal()),
                   ),
-                if (opportunity.endsAt != null)
+                if (detail.endsAt != null)
                   _DetailRow(
-                    label: '마감',
-                    value: dateFormat.format(opportunity.endsAt!.toLocal()),
+                    label: l10n.detailEnd,
+                    value: dateFormat.format(detail.endsAt!.toLocal()),
                   ),
-                _DetailRow(label: '자격', value: opportunity.eligibilityKo),
-                if (opportunity.regionNoteKo != null &&
-                    opportunity.regionNoteKo!.trim().isNotEmpty)
-                  _DetailRow(label: '지역', value: opportunity.regionNoteKo!),
-                if (opportunity.tasksKo.isNotEmpty) ...[
+                _DetailRow(
+                  label: l10n.detailEligibility,
+                  value: detail.eligibilityKo,
+                ),
+                if (detail.regionNoteKo != null &&
+                    detail.regionNoteKo!.trim().isNotEmpty)
+                  _DetailRow(
+                    label: l10n.detailRegion,
+                    value: detail.regionNoteKo!,
+                  ),
+                if (detail.tasksKo.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   Text(
-                    '참여 단계',
+                    l10n.detailTasks,
                     style: theme.textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 8),
-                  for (final task in opportunity.tasksKo)
+                  for (final task in detail.tasksKo)
                     Padding(
                       padding: const EdgeInsets.only(bottom: 6),
                       child: Row(
@@ -270,34 +349,44 @@ class OpportunityCard extends StatelessWidget {
                       ),
                     ),
                 ],
-                if (opportunity.asOf != null) ...[
+                if (detail.asOf != null) ...[
                   const SizedBox(height: 12),
                   Text(
-                    '기준 ${dateFormat.format(opportunity.asOf!.toLocal())} · 투자 권유 아님 · 조건은 원문 우선',
+                    l10n.detailAsOf(
+                      dateFormat.format(detail.asOf!.toLocal()),
+                    ),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.muted,
                     ),
                   ),
                 ],
-                const SizedBox(height: 16),
-                FilledButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    _openOfficial(context);
-                  },
-                  style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.brand,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: AiSummaryButton(
+                        busy: _analyzing,
+                        onPressed: _analyzing
+                            ? null
+                            : () async {
+                                Navigator.pop(sheetContext);
+                                await _runAi();
+                              },
+                      ),
                     ),
-                  ),
-                  child: const Text(
-                    '원문 보기  ›',
-                    style: TextStyle(fontWeight: FontWeight.w700),
-                  ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 4,
+                      child: OfficialLinkButton(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _openOfficial(context);
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -308,22 +397,23 @@ class OpportunityCard extends StatelessWidget {
   }
 
   Future<void> _openOfficial(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     final uri = Uri.tryParse(opportunity.officialUrl.trim());
     if (uri == null ||
         (uri.scheme != 'http' && uri.scheme != 'https') ||
         uri.host.isEmpty) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('유효한 링크가 없습니다.')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.invalidLink)));
       }
       return;
     }
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('링크를 열 수 없습니다.')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.cannotOpenLink)));
     }
   }
 }
@@ -416,7 +506,7 @@ class _ThumbArt extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [Color(0xFF128C85), Color(0xFF0A4F4B)],
+          colors: [AppColors.bannerEnd, AppColors.brandDark],
         ),
       ),
       child: Icon(icon, color: Colors.white.withValues(alpha: 0.92), size: 32),
@@ -438,7 +528,7 @@ class _DetailRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 48,
+            width: 88,
             child: Text(
               label,
               style: const TextStyle(

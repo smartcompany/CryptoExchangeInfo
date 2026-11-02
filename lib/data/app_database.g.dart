@@ -1058,8 +1058,25 @@ class $ExchangeCachesTable extends ExchangeCaches
     type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _localeCodeMeta = const VerificationMeta(
+    'localeCode',
+  );
   @override
-  List<GeneratedColumn> get $columns => [exchange, total, fetchedAtMs];
+  late final GeneratedColumn<String> localeCode = GeneratedColumn<String>(
+    'locale_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('ko'),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    exchange,
+    total,
+    fetchedAtMs,
+    localeCode,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1097,6 +1114,12 @@ class $ExchangeCachesTable extends ExchangeCaches
     } else if (isInserting) {
       context.missing(_fetchedAtMsMeta);
     }
+    if (data.containsKey('locale_code')) {
+      context.handle(
+        _localeCodeMeta,
+        localeCode.isAcceptableOrUnknown(data['locale_code']!, _localeCodeMeta),
+      );
+    }
     return context;
   }
 
@@ -1118,6 +1141,10 @@ class $ExchangeCachesTable extends ExchangeCaches
         DriftSqlType.int,
         data['${effectivePrefix}fetched_at_ms'],
       )!,
+      localeCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}locale_code'],
+      )!,
     );
   }
 
@@ -1131,10 +1158,14 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
   final String exchange;
   final int total;
   final int fetchedAtMs;
+
+  /// App language used when titles/descriptions were localized into cache.
+  final String localeCode;
   const ExchangeCache({
     required this.exchange,
     required this.total,
     required this.fetchedAtMs,
+    required this.localeCode,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1142,6 +1173,7 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
     map['exchange'] = Variable<String>(exchange);
     map['total'] = Variable<int>(total);
     map['fetched_at_ms'] = Variable<int>(fetchedAtMs);
+    map['locale_code'] = Variable<String>(localeCode);
     return map;
   }
 
@@ -1150,6 +1182,7 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
       exchange: Value(exchange),
       total: Value(total),
       fetchedAtMs: Value(fetchedAtMs),
+      localeCode: Value(localeCode),
     );
   }
 
@@ -1162,6 +1195,7 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
       exchange: serializer.fromJson<String>(json['exchange']),
       total: serializer.fromJson<int>(json['total']),
       fetchedAtMs: serializer.fromJson<int>(json['fetchedAtMs']),
+      localeCode: serializer.fromJson<String>(json['localeCode']),
     );
   }
   @override
@@ -1171,15 +1205,21 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
       'exchange': serializer.toJson<String>(exchange),
       'total': serializer.toJson<int>(total),
       'fetchedAtMs': serializer.toJson<int>(fetchedAtMs),
+      'localeCode': serializer.toJson<String>(localeCode),
     };
   }
 
-  ExchangeCache copyWith({String? exchange, int? total, int? fetchedAtMs}) =>
-      ExchangeCache(
-        exchange: exchange ?? this.exchange,
-        total: total ?? this.total,
-        fetchedAtMs: fetchedAtMs ?? this.fetchedAtMs,
-      );
+  ExchangeCache copyWith({
+    String? exchange,
+    int? total,
+    int? fetchedAtMs,
+    String? localeCode,
+  }) => ExchangeCache(
+    exchange: exchange ?? this.exchange,
+    total: total ?? this.total,
+    fetchedAtMs: fetchedAtMs ?? this.fetchedAtMs,
+    localeCode: localeCode ?? this.localeCode,
+  );
   ExchangeCache copyWithCompanion(ExchangeCachesCompanion data) {
     return ExchangeCache(
       exchange: data.exchange.present ? data.exchange.value : this.exchange,
@@ -1187,6 +1227,9 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
       fetchedAtMs: data.fetchedAtMs.present
           ? data.fetchedAtMs.value
           : this.fetchedAtMs,
+      localeCode: data.localeCode.present
+          ? data.localeCode.value
+          : this.localeCode,
     );
   }
 
@@ -1195,37 +1238,42 @@ class ExchangeCache extends DataClass implements Insertable<ExchangeCache> {
     return (StringBuffer('ExchangeCache(')
           ..write('exchange: $exchange, ')
           ..write('total: $total, ')
-          ..write('fetchedAtMs: $fetchedAtMs')
+          ..write('fetchedAtMs: $fetchedAtMs, ')
+          ..write('localeCode: $localeCode')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(exchange, total, fetchedAtMs);
+  int get hashCode => Object.hash(exchange, total, fetchedAtMs, localeCode);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ExchangeCache &&
           other.exchange == this.exchange &&
           other.total == this.total &&
-          other.fetchedAtMs == this.fetchedAtMs);
+          other.fetchedAtMs == this.fetchedAtMs &&
+          other.localeCode == this.localeCode);
 }
 
 class ExchangeCachesCompanion extends UpdateCompanion<ExchangeCache> {
   final Value<String> exchange;
   final Value<int> total;
   final Value<int> fetchedAtMs;
+  final Value<String> localeCode;
   final Value<int> rowid;
   const ExchangeCachesCompanion({
     this.exchange = const Value.absent(),
     this.total = const Value.absent(),
     this.fetchedAtMs = const Value.absent(),
+    this.localeCode = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   ExchangeCachesCompanion.insert({
     required String exchange,
     this.total = const Value.absent(),
     required int fetchedAtMs,
+    this.localeCode = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : exchange = Value(exchange),
        fetchedAtMs = Value(fetchedAtMs);
@@ -1233,12 +1281,14 @@ class ExchangeCachesCompanion extends UpdateCompanion<ExchangeCache> {
     Expression<String>? exchange,
     Expression<int>? total,
     Expression<int>? fetchedAtMs,
+    Expression<String>? localeCode,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
       if (exchange != null) 'exchange': exchange,
       if (total != null) 'total': total,
       if (fetchedAtMs != null) 'fetched_at_ms': fetchedAtMs,
+      if (localeCode != null) 'locale_code': localeCode,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -1247,12 +1297,14 @@ class ExchangeCachesCompanion extends UpdateCompanion<ExchangeCache> {
     Value<String>? exchange,
     Value<int>? total,
     Value<int>? fetchedAtMs,
+    Value<String>? localeCode,
     Value<int>? rowid,
   }) {
     return ExchangeCachesCompanion(
       exchange: exchange ?? this.exchange,
       total: total ?? this.total,
       fetchedAtMs: fetchedAtMs ?? this.fetchedAtMs,
+      localeCode: localeCode ?? this.localeCode,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -1269,6 +1321,9 @@ class ExchangeCachesCompanion extends UpdateCompanion<ExchangeCache> {
     if (fetchedAtMs.present) {
       map['fetched_at_ms'] = Variable<int>(fetchedAtMs.value);
     }
+    if (localeCode.present) {
+      map['locale_code'] = Variable<String>(localeCode.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -1281,6 +1336,7 @@ class ExchangeCachesCompanion extends UpdateCompanion<ExchangeCache> {
           ..write('exchange: $exchange, ')
           ..write('total: $total, ')
           ..write('fetchedAtMs: $fetchedAtMs, ')
+          ..write('localeCode: $localeCode, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1773,6 +1829,7 @@ typedef $$ExchangeCachesTableCreateCompanionBuilder =
       required String exchange,
       Value<int> total,
       required int fetchedAtMs,
+      Value<String> localeCode,
       Value<int> rowid,
     });
 typedef $$ExchangeCachesTableUpdateCompanionBuilder =
@@ -1780,6 +1837,7 @@ typedef $$ExchangeCachesTableUpdateCompanionBuilder =
       Value<String> exchange,
       Value<int> total,
       Value<int> fetchedAtMs,
+      Value<String> localeCode,
       Value<int> rowid,
     });
 
@@ -1804,6 +1862,11 @@ class $$ExchangeCachesTableFilterComposer
 
   ColumnFilters<int> get fetchedAtMs => $composableBuilder(
     column: $table.fetchedAtMs,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localeCode => $composableBuilder(
+    column: $table.localeCode,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1831,6 +1894,11 @@ class $$ExchangeCachesTableOrderingComposer
     column: $table.fetchedAtMs,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get localeCode => $composableBuilder(
+    column: $table.localeCode,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ExchangeCachesTableAnnotationComposer
@@ -1850,6 +1918,11 @@ class $$ExchangeCachesTableAnnotationComposer
 
   GeneratedColumn<int> get fetchedAtMs => $composableBuilder(
     column: $table.fetchedAtMs,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get localeCode => $composableBuilder(
+    column: $table.localeCode,
     builder: (column) => column,
   );
 }
@@ -1890,11 +1963,13 @@ class $$ExchangeCachesTableTableManager
                 Value<String> exchange = const Value.absent(),
                 Value<int> total = const Value.absent(),
                 Value<int> fetchedAtMs = const Value.absent(),
+                Value<String> localeCode = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExchangeCachesCompanion(
                 exchange: exchange,
                 total: total,
                 fetchedAtMs: fetchedAtMs,
+                localeCode: localeCode,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1902,11 +1977,13 @@ class $$ExchangeCachesTableTableManager
                 required String exchange,
                 Value<int> total = const Value.absent(),
                 required int fetchedAtMs,
+                Value<String> localeCode = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => ExchangeCachesCompanion.insert(
                 exchange: exchange,
                 total: total,
                 fetchedAtMs: fetchedAtMs,
+                localeCode: localeCode,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

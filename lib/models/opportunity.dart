@@ -25,28 +25,28 @@ enum OpportunityType {
   }
 
   String get wire => switch (this) {
-        OpportunityType.event => 'event',
-        OpportunityType.tradingContest => 'trading_contest',
-        OpportunityType.earnBoost => 'earn_boost',
-        OpportunityType.depositBonus => 'deposit_bonus',
-        OpportunityType.convertChallenge => 'convert_challenge',
-        OpportunityType.dualChallenge => 'dual_challenge',
-        OpportunityType.feePromo => 'fee_promo',
-        OpportunityType.listing => 'listing',
-        OpportunityType.other => 'other',
-      };
+    OpportunityType.event => 'event',
+    OpportunityType.tradingContest => 'trading_contest',
+    OpportunityType.earnBoost => 'earn_boost',
+    OpportunityType.depositBonus => 'deposit_bonus',
+    OpportunityType.convertChallenge => 'convert_challenge',
+    OpportunityType.dualChallenge => 'dual_challenge',
+    OpportunityType.feePromo => 'fee_promo',
+    OpportunityType.listing => 'listing',
+    OpportunityType.other => 'other',
+  };
 
   String get labelKo => switch (this) {
-        OpportunityType.event => '이벤트',
-        OpportunityType.tradingContest => '거래대회',
-        OpportunityType.earnBoost => 'Earn부스트',
-        OpportunityType.depositBonus => '입금보너스',
-        OpportunityType.convertChallenge => 'Convert',
-        OpportunityType.dualChallenge => '듀얼',
-        OpportunityType.feePromo => '수수료',
-        OpportunityType.listing => '상장',
-        OpportunityType.other => '기타',
-      };
+    OpportunityType.event => '이벤트',
+    OpportunityType.tradingContest => '거래대회',
+    OpportunityType.earnBoost => 'Earn부스트',
+    OpportunityType.depositBonus => '입금보너스',
+    OpportunityType.convertChallenge => 'Convert',
+    OpportunityType.dualChallenge => '듀얼',
+    OpportunityType.feePromo => '수수료',
+    OpportunityType.listing => '상장',
+    OpportunityType.other => '기타',
+  };
 }
 
 enum OpportunityStatus {
@@ -65,18 +65,18 @@ enum OpportunityStatus {
   }
 
   String get wire => switch (this) {
-        OpportunityStatus.upcoming => 'upcoming',
-        OpportunityStatus.live => 'live',
-        OpportunityStatus.endingSoon => 'ending_soon',
-        OpportunityStatus.ended => 'ended',
-      };
+    OpportunityStatus.upcoming => 'upcoming',
+    OpportunityStatus.live => 'live',
+    OpportunityStatus.endingSoon => 'ending_soon',
+    OpportunityStatus.ended => 'ended',
+  };
 
   String get labelKo => switch (this) {
-        OpportunityStatus.upcoming => '예정',
-        OpportunityStatus.live => '진행중',
-        OpportunityStatus.endingSoon => '곧마감',
-        OpportunityStatus.ended => '종료',
-      };
+    OpportunityStatus.upcoming => '예정',
+    OpportunityStatus.live => '진행중',
+    OpportunityStatus.endingSoon => '곧마감',
+    OpportunityStatus.ended => '종료',
+  };
 }
 
 class Opportunity {
@@ -164,6 +164,38 @@ class Opportunity {
       reviewedAt: _parseDate(json['reviewedAt']),
       asOf: _parseDate(json['asOf']),
       reviewStatus: json['reviewStatus']?.toString() ?? 'draft',
+    );
+  }
+
+  Opportunity copyWith({
+    String? titleKo,
+    String? titleEn,
+    String? summaryKo,
+    String? rewardLabel,
+    String? eligibilityKo,
+    List<String>? tasksKo,
+    String? regionNoteKo,
+  }) {
+    return Opportunity(
+      id: id,
+      exchange: exchange,
+      titleKo: titleKo ?? this.titleKo,
+      titleEn: titleEn ?? this.titleEn,
+      summaryKo: summaryKo ?? this.summaryKo,
+      type: type,
+      rewardLabel: rewardLabel ?? this.rewardLabel,
+      startsAt: startsAt,
+      endsAt: endsAt,
+      status: status,
+      eligibilityKo: eligibilityKo ?? this.eligibilityKo,
+      tasksKo: tasksKo ?? this.tasksKo,
+      officialUrl: officialUrl,
+      sourceNoticeUrl: sourceNoticeUrl,
+      relatedProductId: relatedProductId,
+      regionNoteKo: regionNoteKo ?? this.regionNoteKo,
+      reviewedAt: reviewedAt,
+      asOf: asOf,
+      reviewStatus: reviewStatus,
     );
   }
 

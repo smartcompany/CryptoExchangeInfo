@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
+import '../l10n/l10n_labels.dart';
 import '../services/exchange_events_service.dart';
 import '../theme/app_colors.dart';
 
@@ -18,12 +20,17 @@ class ExchangeBanner extends StatelessWidget {
         4,
       ),
       child: switch (exchange) {
-        Exchange.bybit => const _BybitBanner(),
         Exchange.binance => const _BinanceBanner(),
         Exchange.okx => const _OkxBanner(),
+        Exchange.bybit => const _BybitBanner(),
+        Exchange.gate => const _GateBanner(),
+        Exchange.mexc => const _MexcBanner(),
+        Exchange.bitget => const _BitgetBanner(),
+        Exchange.kucoin => const _KucoinBanner(),
+        Exchange.coinbase => const _CoinbaseBanner(),
+        Exchange.htx => const _HtxBanner(),
         Exchange.upbit => const _UpbitBanner(),
         Exchange.bithumb => const _BithumbBanner(),
-        Exchange.bitget => const _BitgetBanner(),
       },
     );
   }
@@ -43,7 +50,7 @@ class _BannerShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 132,
+      constraints: const BoxConstraints(minHeight: 132),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         gradient: gradient,
@@ -72,11 +79,7 @@ class _Tag extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: fg,
-          fontWeight: FontWeight.w700,
-          fontSize: 12,
-        ),
+        style: TextStyle(color: fg, fontWeight: FontWeight.w700, fontSize: 12),
       ),
     );
   }
@@ -116,6 +119,7 @@ class _BybitBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -136,35 +140,44 @@ class _BybitBanner extends StatelessWidget {
           Positioned(
             right: 16,
             bottom: 16,
-            child: _GlyphRow(
-              const [
-                Icons.candlestick_chart_outlined,
-                Icons.speed_rounded,
-                Icons.emoji_events_outlined,
-              ],
-              color: const Color(0xFFF7A600),
-            ),
+            child: _GlyphRow(const [
+              Icons.candlestick_chart_outlined,
+              Icons.speed_rounded,
+              Icons.emoji_events_outlined,
+            ], color: const Color(0xFFF7A600)),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('바이비트', fg: Color(0xFF1C1C1E), bg: Color(0xFFF7A600)),
-                SizedBox(height: 12),
+                _Tag(
+                  l10n.exchangeName(Exchange.bybit),
+                  fg: const Color(0xFF1C1C1E),
+                  bg: const Color(0xFFF7A600),
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '트레이딩 캠페인',
-                  style: TextStyle(
+                  l10n.bannerBybitTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'WSOT·거래 대회와 보상 이벤트를 한눈에',
-                  style: TextStyle(color: Color(0xFFD6D3D1), fontSize: 13),
+                  l10n.bannerBybitBody,
+                  style: const TextStyle(
+                    color: Color(0xFFD6D3D1),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -175,17 +188,22 @@ class _BybitBanner extends StatelessWidget {
   }
 }
 
-/// Binance — signature yellow / near-black
+/// Binance — espresso stone hero (quiet boutique)
 class _BinanceBanner extends StatelessWidget {
   const _BinanceBanner();
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
-        colors: [Color(0xFFF0B90B), Color(0xFFC99400)],
+        colors: [
+          AppColors.bannerStart,
+          AppColors.bannerMid,
+          AppColors.bannerEnd,
+        ],
       ),
       child: Stack(
         children: [
@@ -197,46 +215,52 @@ class _BinanceBanner extends StatelessWidget {
               child: Icon(
                 Icons.hexagon_outlined,
                 size: 150,
-                color: Colors.black.withValues(alpha: 0.12),
+                color: Colors.white.withValues(alpha: 0.08),
               ),
             ),
           ),
           Positioned(
             right: 16,
             bottom: 16,
-            child: _GlyphRow(
-              const [
-                Icons.card_giftcard_rounded,
-                Icons.savings_outlined,
-                Icons.currency_bitcoin,
-              ],
-              color: const Color(0xFF1E2026),
-            ),
+            child: _GlyphRow(const [
+              Icons.card_giftcard_rounded,
+              Icons.savings_outlined,
+              Icons.currency_bitcoin,
+            ], color: AppColors.bannerMist),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('바이낸스', fg: Color(0xFFF0B90B), bg: Color(0xFF1E2026)),
-                SizedBox(height: 12),
+                _Tag(
+                  l10n.exchangeName(Exchange.binance),
+                  fg: AppColors.ink,
+                  bg: AppColors.bannerMist,
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '글로벌 이벤트 허브',
-                  style: TextStyle(
-                    color: Color(0xFF1E2026),
+                  l10n.bannerBinanceTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  'Earn 부스트·거래 토너먼트·에어드롭까지',
+                  l10n.bannerBinanceBody,
                   style: TextStyle(
-                    color: Color(0xFF3D2E00),
+                    color: Colors.white.withValues(alpha: 0.82),
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -253,13 +277,16 @@ class _OkxBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
         colors: [Color(0xFF0A0A0A), Color(0xFF161B22)],
       ),
-      border: Border.all(color: const Color(0xFF2F81F7).withValues(alpha: 0.35)),
+      border: Border.all(
+        color: const Color(0xFF2F81F7).withValues(alpha: 0.35),
+      ),
       child: Stack(
         children: [
           Positioned(
@@ -283,35 +310,44 @@ class _OkxBanner extends StatelessWidget {
           const Positioned(
             right: 18,
             bottom: 18,
-            child: _GlyphRow(
-              [
-                Icons.grid_view_rounded,
-                Icons.show_chart,
-                Icons.layers_outlined,
-              ],
-              color: Color(0xFF79B8FF),
-            ),
+            child: _GlyphRow([
+              Icons.grid_view_rounded,
+              Icons.show_chart,
+              Icons.layers_outlined,
+            ], color: Color(0xFF79B8FF)),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('OKX', fg: Colors.white, bg: Color(0xFF2F81F7)),
-                SizedBox(height: 12),
+                _Tag(
+                  l10n.exchangeName(Exchange.okx),
+                  fg: Colors.white,
+                  bg: const Color(0xFF2F81F7),
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '심플한 기회 보드',
-                  style: TextStyle(
+                  l10n.bannerOkxTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  '캠페인·리워드를 군더더기 없이',
-                  style: TextStyle(color: Color(0xFF9CA3AF), fontSize: 13),
+                  l10n.bannerOkxBody,
+                  style: const TextStyle(
+                    color: Color(0xFF9CA3AF),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -328,6 +364,7 @@ class _UpbitBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -354,34 +391,40 @@ class _UpbitBanner extends StatelessWidget {
           const Positioned(
             right: 18,
             bottom: 16,
-            child: _GlyphRow(
-              [
-                Icons.notifications_active_outlined,
-                Icons.article_outlined,
-                Icons.flag_outlined,
-              ],
-            ),
+            child: _GlyphRow([
+              Icons.notifications_active_outlined,
+              Icons.article_outlined,
+              Icons.flag_outlined,
+            ]),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('업비트'),
-                SizedBox(height: 12),
+                _Tag(l10n.exchangeName(Exchange.upbit)),
+                const SizedBox(height: 8),
                 Text(
-                  '국내 공지·이벤트',
-                  style: TextStyle(
+                  l10n.bannerUpbitTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  '상장·이벤트 소식을 빠르게 확인하세요',
-                  style: TextStyle(color: Color(0xFFD6E4FF), fontSize: 13),
+                  l10n.bannerUpbitBody,
+                  style: const TextStyle(
+                    color: Color(0xFFD6E4FF),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -398,6 +441,7 @@ class _BithumbBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -418,34 +462,44 @@ class _BithumbBanner extends StatelessWidget {
           const Positioned(
             right: 16,
             bottom: 16,
-            child: _GlyphRow(
-              [
-                Icons.campaign_outlined,
-                Icons.card_giftcard_rounded,
-                Icons.favorite_border,
-              ],
-            ),
+            child: _GlyphRow([
+              Icons.campaign_outlined,
+              Icons.card_giftcard_rounded,
+              Icons.favorite_border,
+            ]),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('빗썸', fg: Color(0xFFC1121F), bg: Colors.white),
-                SizedBox(height: 12),
+                _Tag(
+                  l10n.exchangeName(Exchange.bithumb),
+                  fg: const Color(0xFFC1121F),
+                  bg: Colors.white,
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '핫한 프로모션',
-                  style: TextStyle(
+                  l10n.bannerBithumbTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  '이벤트·공지를 따뜻하게 모아봤어요',
-                  style: TextStyle(color: Color(0xFFFFE5D9), fontSize: 13),
+                  l10n.bannerBithumbBody,
+                  style: const TextStyle(
+                    color: Color(0xFFFFE5D9),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -462,6 +516,7 @@ class _BitgetBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return _BannerShell(
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
@@ -482,35 +537,358 @@ class _BitgetBanner extends StatelessWidget {
           Positioned(
             right: 16,
             bottom: 16,
-            child: _GlyphRow(
-              const [
-                Icons.swipe_rounded,
-                Icons.trending_up,
-                Icons.workspace_premium_outlined,
-              ],
-              color: const Color(0xFF00F0FF),
-            ),
+            child: _GlyphRow(const [
+              Icons.swipe_rounded,
+              Icons.trending_up,
+              Icons.workspace_premium_outlined,
+            ], color: const Color(0xFF00F0FF)),
           ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(18, 18, 120, 18),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _Tag('Bitget', fg: Color(0xFF041E26), bg: Color(0xFF00F0FF)),
-                SizedBox(height: 12),
+                _Tag(
+                  l10n.exchangeName(Exchange.bitget),
+                  fg: const Color(0xFF041E26),
+                  bg: const Color(0xFF00F0FF),
+                ),
+                const SizedBox(height: 8),
                 Text(
-                  '카피·이벤트 존',
-                  style: TextStyle(
+                  l10n.bannerBitgetTitle,
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                     height: 1.2,
                   ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 Text(
-                  '리워드와 캠페인을 네온처럼 선명하게',
-                  style: TextStyle(color: Color(0xFF9DE8ED), fontSize: 13),
+                  l10n.bannerBitgetBody,
+                  style: const TextStyle(
+                    color: Color(0xFF9DE8ED),
+                    fontSize: 13,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GateBanner extends StatelessWidget {
+  const _GateBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _BannerShell(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF17E6A1), Color(0xFF0B8F6B)],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _GlyphRow(const [
+              Icons.emoji_events_outlined,
+              Icons.campaign_outlined,
+              Icons.stacked_line_chart,
+            ], color: const Color(0xFF063D31)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Tag(
+                  l10n.exchangeName(Exchange.gate),
+                  fg: const Color(0xFF063D31),
+                  bg: Colors.white,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.bannerGateTitle,
+                  style: const TextStyle(
+                    color: Color(0xFF063D31),
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.bannerGateBody,
+                  style: const TextStyle(
+                    color: Color(0xFF0A4F40),
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MexcBanner extends StatelessWidget {
+  const _MexcBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _BannerShell(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF1B1F2A), Color(0xFF2B3347)],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _GlyphRow(const [
+              Icons.bolt_rounded,
+              Icons.rocket_launch_outlined,
+              Icons.insights_outlined,
+            ], color: const Color(0xFF1EE3A0)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Tag(
+                  l10n.exchangeName(Exchange.mexc),
+                  fg: const Color(0xFF1B1F2A),
+                  bg: const Color(0xFF1EE3A0),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.bannerMexcTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.bannerMexcBody,
+                  style: const TextStyle(color: Color(0xFFB7C0D4), fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _KucoinBanner extends StatelessWidget {
+  const _KucoinBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _BannerShell(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF23AF91), Color(0xFF147A66)],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _GlyphRow(const [
+              Icons.savings_outlined,
+              Icons.new_releases_outlined,
+              Icons.public,
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Tag(
+                  l10n.exchangeName(Exchange.kucoin),
+                  fg: Colors.white,
+                  bg: const Color(0xFF0E5A4B),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.bannerKucoinTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.bannerKucoinBody,
+                  style: const TextStyle(color: Color(0xFFD7FFF4), fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CoinbaseBanner extends StatelessWidget {
+  const _CoinbaseBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _BannerShell(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF0052FF), Color(0xFF0036B3)],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _GlyphRow(const [
+              Icons.shield_outlined,
+              Icons.notifications_active_outlined,
+              Icons.schedule,
+            ]),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Tag(
+                  l10n.exchangeName(Exchange.coinbase),
+                  fg: const Color(0xFF0052FF),
+                  bg: Colors.white,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.bannerCoinbaseTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.bannerCoinbaseBody,
+                  style: const TextStyle(color: Color(0xFFD6E4FF), fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HtxBanner extends StatelessWidget {
+  const _HtxBanner();
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    return _BannerShell(
+      gradient: const LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [Color(0xFF1F1A17), Color(0xFF3A2A1C)],
+      ),
+      child: Stack(
+        children: [
+          Positioned(
+            right: 16,
+            bottom: 16,
+            child: _GlyphRow(const [
+              Icons.card_giftcard_rounded,
+              Icons.local_activity_outlined,
+              Icons.stars_outlined,
+            ], color: const Color(0xFFE6A23C)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _Tag(
+                  l10n.exchangeName(Exchange.htx),
+                  fg: const Color(0xFF1F1A17),
+                  bg: const Color(0xFFE6A23C),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.bannerHtxTitle,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.bannerHtxBody,
+                  style: const TextStyle(color: Color(0xFFE8D5B5), fontSize: 13),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

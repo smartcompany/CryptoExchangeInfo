@@ -1,4 +1,4 @@
-package com.coininfo.coininfo
+package com.smartcompany.cryptoExchangeInfo
 
 import io.flutter.embedding.android.FlutterActivity
 

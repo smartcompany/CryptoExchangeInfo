@@ -63,26 +63,16 @@ class EarnProduct {
   final List<EarnTier> tiers;
   final String? note;
 
-  String get exchangeLabel => switch (exchange) {
-        'bybit' => '바이비트',
-        'binance' => '바이낸스',
-        'okx' => 'OKX',
-        'upbit' => '업비트',
-        'bithumb' => '빗썸',
-        'bitget' => 'Bitget',
-        _ => exchange,
-      };
-
   /// Official Flexible / Earn page for this exchange.
   String? get earnPageUrl => switch (exchange) {
-        'bybit' => 'https://www.bybit.com/earn/savings',
-        'binance' => 'https://www.binance.com/en/simple-earn',
-        'okx' => 'https://www.okx.com/earn',
-        'bitget' => 'https://www.bitget.com/earn/savings',
-        'upbit' => 'https://upbit.com/earn',
-        'bithumb' => 'https://www.bithumb.com/react/earn',
-        _ => null,
-      };
+    'bybit' => 'https://www.bybit.com/earn/savings',
+    'binance' => 'https://www.binance.com/en/simple-earn',
+    'okx' => 'https://www.okx.com/earn',
+    'bitget' => 'https://www.bitget.com/earn/savings',
+    'upbit' => 'https://upbit.com/earn',
+    'bithumb' => 'https://www.bithumb.com/react/earn',
+    _ => null,
+  };
 
   factory EarnProduct.fromJson(Map<String, dynamic> json) {
     return EarnProduct(
