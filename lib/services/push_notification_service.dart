@@ -61,8 +61,9 @@ class PushNotificationService {
 
     if (prefs.masterEnabled) {
       await syncTopics();
-      unawaited(registerPushToken());
     }
+    // Always upsert user row on launch (token only when master is on).
+    unawaited(registerPushToken());
     _ready = true;
   }
 
@@ -87,9 +88,7 @@ class PushNotificationService {
         unawaited(registerPushToken());
         return false;
       }
-      try {
-        token = await FirebaseMessaging.instance.getToken();
-      } catch (_) {}
+      token = await _resolveFcmToken();
     }
 
     prefs.masterEnabled = value;
@@ -131,19 +130,41 @@ class PushNotificationService {
 
     String? token = tokenOverride;
     if (prefs.masterEnabled && (token == null || token.isEmpty)) {
-      try {
-        token = await FirebaseMessaging.instance.getToken();
-      } catch (e) {
-        debugPrint('[push] getToken failed: $e');
-      }
+      token = await _resolveFcmToken();
     }
 
     final locale = PlatformDispatcher.instance.locale.languageCode;
-    await PushRegisterService.instance.upsert(
+    final ok = await PushRegisterService.instance.upsert(
       pushEnabled: prefs.masterEnabled,
       pushToken: token,
       locale: locale,
     );
+    if (!ok) {
+      debugPrint(
+        '[push] register failed (check Railway SUPABASE_* env + API logs)',
+      );
+    }
+  }
+
+  /// iOS needs an APNs token before FCM `getToken` succeeds.
+  Future<String?> _resolveFcmToken() async {
+    final messaging = FirebaseMessaging.instance;
+    try {
+      if (defaultTargetPlatform == TargetPlatform.iOS) {
+        String? apns = await messaging.getAPNSToken();
+        for (var i = 0; i < 10 && (apns == null || apns.isEmpty); i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 300));
+          apns = await messaging.getAPNSToken();
+        }
+        if (apns == null || apns.isEmpty) {
+          debugPrint('[push] APNs token not ready yet');
+        }
+      }
+      return await messaging.getToken();
+    } catch (e) {
+      debugPrint('[push] getToken failed: $e');
+      return null;
+    }
   }
 
   /// Subscribe/unsubscribe so local prefs match FCM topics.
