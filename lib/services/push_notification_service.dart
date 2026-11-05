@@ -5,7 +5,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../firebase_options.dart';
 import 'push_preferences.dart';
 import 'push_register_service.dart';
 import 'push_topics.dart';
@@ -36,9 +35,9 @@ class PushNotificationService {
       return;
     }
 
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
+    // Use native config (google-services.json / GoogleService-Info.plist)
+    // so API keys are not duplicated in Dart source (GitHub secret scanning).
+    await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
 
     prefs = await PushPreferences.load();
