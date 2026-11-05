@@ -10,6 +10,25 @@
   "searchCloseTooltip": "Close search",
   "notificationsTooltip": "Notifications",
   "notificationsComingSoon": "Notifications are coming soon.",
+  "pushSettingsTitle": "Push alerts",
+  "pushSettingsIntro": "Get notified about useful exchange opportunities without opening the app. Turn on only what you care about.",
+  "pushMasterTitle": "Opportunity alerts",
+  "pushMasterSubtitle": "Master switch for push notifications",
+  "pushPermissionDenied": "Notification permission was denied.",
+  "pushCategoriesSection": "What to receive",
+  "pushExchangesSection": "Which exchanges",
+  "pushExchangesHint": "Alerts only fire when both a category and an exchange are enabled.",
+  "pushOtherExchangesNote": "Other exchanges (Gate, MEXC, …) are not covered by server polling yet.",
+  "pushCatContest": "Trading contests",
+  "pushCatContestDesc": "Volume / PnL contests and reward campaigns",
+  "pushCatEarn": "Earn · APR boosts",
+  "pushCatEarnDesc": "Flexible / Fixed earn promos and Launchpool-style offers",
+  "pushCatListing": "New listings · Launchpad",
+  "pushCatListingDesc": "Listing and launch announcements",
+  "pushCatDeposit": "Deposit · signup bonuses",
+  "pushCatDepositDesc": "Welcome and deposit bonus campaigns (can be noisy)",
+  "pushCatOther": "Other campaigns",
+  "pushCatOtherDesc": "Fee discounts, convert challenges, and the rest",
   "refreshTooltip": "Refresh",
   "loadingEvents": "Loading events…",
   "loadingEarn": "Loading Flexible USDT Earn…",
@@ -122,6 +141,24 @@
     }
   },
   "viewOriginal": "View original",
+  "bannerSignUp": "Sign up",
+  "appIconExperimentTooltip": "App icon experiment",
+  "appIconExperimentTitle": "App icon experiment",
+  "appIconExperimentBody": "Try Hub or Portal as the home-screen icon. You can switch anytime.",
+  "appIconHub": "Hub",
+  "appIconPortal": "Portal",
+  "appIconSelected": "Selected",
+  "appIconChanged": "App icon updated.",
+  "appIconChangedAndroid": "App icon will update after you leave the app.",
+  "appIconUnsupported": "Icon switching isn’t supported on this device.",
+  "appIconChangeFailed": "Couldn’t change icon: {error}",
+  "@appIconChangeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "adConfirmTitle": "AI summary",
   "adConfirmMessage": "Watch an ad to unlock the AI summary. Continue?",
   "cancel": "Cancel",
@@ -193,7 +230,6 @@
   "exchangeMexc": "MEXC",
   "exchangeKucoin": "KuCoin",
   "exchangeCoinbase": "Coinbase",
-  "exchangeHtx": "HTX",
   "bannerGateTitle": "Listings & campaigns",
   "bannerGateBody": "Gate promotions and trading contests in one feed",
   "bannerMexcTitle": "Event radar",
@@ -201,7 +237,5 @@
   "bannerKucoinTitle": "KuCoin pulse",
   "bannerKucoinBody": "Listings, earn boosts, and platform news",
   "bannerCoinbaseTitle": "Exchange notices",
-  "bannerCoinbaseBody": "Status updates and scheduled maintenance",
-  "bannerHtxTitle": "HTX activities",
-  "bannerHtxBody": "Latest campaigns and platform rewards"
+  "bannerCoinbaseBody": "Status updates and scheduled maintenance"
 }

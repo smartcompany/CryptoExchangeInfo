@@ -100,7 +100,6 @@ class ExchangeEventFetchers {
       Exchange.bitget => _bitget(page: safePage, limit: requestSize),
       Exchange.kucoin => _kucoin(page: safePage, limit: requestSize),
       Exchange.coinbase => _coinbase(page: safePage, limit: requestSize),
-      Exchange.htx => _htx(page: safePage, limit: requestSize),
       Exchange.upbit => _upbit(page: safePage, limit: requestSize),
       Exchange.bithumb => _bithumb(page: safePage, limit: requestSize),
     };
@@ -246,7 +245,7 @@ class ExchangeEventFetchers {
         tags: const ['Latest Activities'],
         url: code.isEmpty
             ? 'https://www.binance.com/en/support/announcement'
-            : 'https://www.binance.com/en/support/announcement/$code',
+            : 'https://www.binance.com/en/support/announcement/detail/$code',
         dateTimestamp: releaseDate,
         startDateTimestamp: null,
         endDateTimestamp: null,
@@ -705,85 +704,6 @@ class ExchangeEventFetchers {
         ? (page - 1) * limit + prepared.length
         : page * limit + 1;
     return (total: assumedTotal, prepared: prepared);
-  }
-
-  /// HTX Latest Activities support list (HTML). Page 1 is the base list URL;
-  /// page N uses `/list/{categoryId}/{N}`.
-  Future<({int total, List<_RawEvent> prepared})> _htx({
-    required int page,
-    required int limit,
-  }) async {
-    const categoryId = '360000031362'; // Latest Activities
-    final path = page <= 1
-        ? '/en-us/support/list/$categoryId/'
-        : '/en-us/support/list/$categoryId/$page';
-    final uri = Uri.parse('https://www.htx.com$path');
-    final res = await _client
-        .get(uri, headers: _browserHeaders)
-        .timeout(const Duration(seconds: 20));
-    if (res.statusCode != 200) {
-      throw Exception('HTX HTTP ${res.statusCode}');
-    }
-    final html = res.body;
-    final pattern = RegExp(
-      r'href="(/en-us/support/(\d+)/)"[\s\S]{0,400}?>([^<>]{10,200})</span></span></span><span[^>]*>\s*([^<>]{5,40})\s*<',
-      caseSensitive: false,
-    );
-    final matches = pattern.allMatches(html).toList();
-    final prepared = <_RawEvent>[];
-    for (final match in matches.take(limit)) {
-      final pathUrl = match.group(1) ?? '';
-      final title = _decodeHtml(match.group(3)?.trim() ?? '');
-      final dateText = match.group(4)?.trim() ?? '';
-      if (title.isEmpty || pathUrl.isEmpty) continue;
-      prepared.add(
-        _RawEvent(
-          exchange: 'htx',
-          title: title,
-          description: '',
-          typeKey: 'latest_activities',
-          typeTitle: 'Latest Activities',
-          tags: const ['Latest Activities'],
-          url: 'https://www.htx.com$pathUrl',
-          dateTimestamp: _parseHtxListDate(dateText),
-          startDateTimestamp: null,
-          endDateTimestamp: null,
-          publishTime: _parseHtxListDate(dateText),
-        ),
-      );
-    }
-    final assumedTotal = prepared.length < limit
-        ? (page - 1) * limit + prepared.length
-        : page * limit + 1;
-    return (total: assumedTotal, prepared: prepared);
-  }
-
-  String _decodeHtml(String value) => value
-      .replaceAll('&amp;', '&')
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&quot;', '"')
-      .replaceAll('&#39;', "'");
-
-  int? _parseHtxListDate(String raw) {
-    // e.g. "10/31 05:00:05 (UTC)" — month/day in current/previous year.
-    final cleaned = raw.replaceAll('(UTC)', '').trim();
-    final match = RegExp(
-      r'^(\d{1,2})/(\d{1,2})\s+(\d{1,2}):(\d{2}):(\d{2})$',
-    ).firstMatch(cleaned);
-    if (match == null) return null;
-    final now = DateTime.now().toUtc();
-    var year = now.year;
-    final month = int.parse(match.group(1)!);
-    final day = int.parse(match.group(2)!);
-    final hour = int.parse(match.group(3)!);
-    final minute = int.parse(match.group(4)!);
-    final second = int.parse(match.group(5)!);
-    var dt = DateTime.utc(year, month, day, hour, minute, second);
-    if (dt.isAfter(now.add(const Duration(days: 2)))) {
-      dt = DateTime.utc(year - 1, month, day, hour, minute, second);
-    }
-    return dt.millisecondsSinceEpoch;
   }
 
   Future<List<ExchangeEvent>> _translateEvents(List<_RawEvent> prepared) async {

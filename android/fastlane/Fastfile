@@ -1,0 +1,29 @@
+default_platform(:android)
+
+platform :android do
+  desc "Upload store listing text via Supply (run export-supply.sh first)"
+  lane :upload_metadata do
+    supply(
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      metadata_path: File.expand_path("metadata", __dir__)
+    )
+  end
+
+  desc "Listing only — no changelogs"
+  lane :upload_listing_only do
+    supply(
+      skip_upload_apk: true,
+      skip_upload_aab: true,
+      skip_upload_metadata: false,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      metadata_path: File.expand_path("metadata", __dir__)
+    )
+  end
+end

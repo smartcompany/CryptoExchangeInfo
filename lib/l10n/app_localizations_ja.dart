@@ -39,6 +39,64 @@ class AppLocalizationsJa extends AppLocalizations {
   String get notificationsComingSoon => '通知機能は近日公開予定です。';
 
   @override
+  String get pushSettingsTitle => 'プッシュ通知';
+
+  @override
+  String get pushSettingsIntro =>
+      'アプリを開かなくても役立つ取引所の機会を受け取れます。必要な項目だけオンにしてください。';
+
+  @override
+  String get pushMasterTitle => '機会アラート';
+
+  @override
+  String get pushMasterSubtitle => 'プッシュ通知のマスタースイッチ';
+
+  @override
+  String get pushPermissionDenied => '通知の許可が拒否されました。';
+
+  @override
+  String get pushCategoriesSection => '受け取る内容';
+
+  @override
+  String get pushExchangesSection => '取引所';
+
+  @override
+  String get pushExchangesHint => 'カテゴリと取引所の両方がオンのときだけ通知されます。';
+
+  @override
+  String get pushOtherExchangesNote => 'Gate・MEXC などはまだサーバーポーリング対象外です。';
+
+  @override
+  String get pushCatContest => '取引コンテスト';
+
+  @override
+  String get pushCatContestDesc => '出来高・PNL大会、報酬キャンペーン';
+
+  @override
+  String get pushCatEarn => 'Earn · APRブースト';
+
+  @override
+  String get pushCatEarnDesc => 'Flexible/Fixed プロモ、Launchpool系';
+
+  @override
+  String get pushCatListing => '新規上場 · Launchpad';
+
+  @override
+  String get pushCatListingDesc => '上場・ローンチ告知';
+
+  @override
+  String get pushCatDeposit => '入金・登録ボーナス';
+
+  @override
+  String get pushCatDepositDesc => 'ウェルカム・入金ボーナス（多めになりがち）';
+
+  @override
+  String get pushCatOther => 'その他キャンペーン';
+
+  @override
+  String get pushCatOtherDesc => '手数料割引、Convertチャレンジなど';
+
+  @override
   String get refreshTooltip => '更新';
 
   @override
@@ -243,6 +301,42 @@ class AppLocalizationsJa extends AppLocalizations {
   String get viewOriginal => '原文を見る';
 
   @override
+  String get bannerSignUp => '登録する';
+
+  @override
+  String get appIconExperimentTooltip => 'アプリアイコン実験';
+
+  @override
+  String get appIconExperimentTitle => 'アプリアイコン実験';
+
+  @override
+  String get appIconExperimentBody =>
+      'ホーム画面アイコンを Hub / Portal で試せます。いつでも切り替え可能です。';
+
+  @override
+  String get appIconHub => 'Hub';
+
+  @override
+  String get appIconPortal => 'Portal';
+
+  @override
+  String get appIconSelected => '選択中';
+
+  @override
+  String get appIconChanged => 'アプリアイコンを更新しました。';
+
+  @override
+  String get appIconChangedAndroid => 'アプリを終了するとアイコンが反映されます。';
+
+  @override
+  String get appIconUnsupported => 'この端末ではアイコン切替に対応していません。';
+
+  @override
+  String appIconChangeFailed(String error) {
+    return 'アイコンを変更できませんでした: $error';
+  }
+
+  @override
   String get adConfirmTitle => 'AI要約';
 
   @override
@@ -363,9 +457,6 @@ class AppLocalizationsJa extends AppLocalizations {
   String get exchangeCoinbase => 'Coinbase';
 
   @override
-  String get exchangeHtx => 'HTX';
-
-  @override
   String get bannerGateTitle => '上場・キャンペーン';
 
   @override
@@ -388,10 +479,4 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get bannerCoinbaseBody => 'ステータス更新と予定メンテナンス';
-
-  @override
-  String get bannerHtxTitle => 'HTXアクティビティ';
-
-  @override
-  String get bannerHtxBody => '最新キャンペーンとリワード';
 }

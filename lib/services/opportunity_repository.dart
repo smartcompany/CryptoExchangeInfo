@@ -4,21 +4,31 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import '../models/opportunity.dart';
+import 'contest_matcher.dart';
+import 'exchange_event_fetchers.dart';
 import 'exchange_events_service.dart';
 import 'translate_service.dart';
 
 class OpportunityRepository {
   OpportunityRepository({
     this.assetPath = 'assets/opportunities_pilot.json',
+    ExchangeEventsService? events,
     TranslateService? translate,
-  }) : _translate = translate ?? TranslateService();
+  }) : // ignore: prefer_initializing_formals
+       _events = events,
+       _translate = translate ?? TranslateService();
 
   final String assetPath;
+  final ExchangeEventsService? _events;
   final TranslateService _translate;
 
   List<Opportunity>? _rawCache;
   final Map<String, List<Opportunity>> _exchangeLocaleCache = {};
+  List<Opportunity>? _liveContestCache;
+  DateTime? _liveContestFetchedAt;
   DateTime? asOf;
+
+  static const _liveContestTtl = Duration(minutes: 20);
 
   String get _activeLocale => TranslateService.normalizeLang(
         PlatformDispatcher.instance.locale.languageCode,
@@ -39,15 +49,24 @@ class OpportunityRepository {
 
     if (localized == null) {
       final raw = await _loadRaw();
-      final forExchange = raw
-          .where((o) => o.exchange == exchange.name)
+      // Pilot JSON keeps non-contest curated cards; contests come from live feeds.
+      final pilot = raw
+          .where(
+            (o) =>
+                o.exchange == exchange.name &&
+                o.type != OpportunityType.tradingContest,
+          )
           .toList(growable: false);
+      final live = await _liveContests(
+        exchanges: [exchange],
+      );
 
+      final merged = [...pilot, ...live];
       if (locale == 'ko') {
-        localized = List<Opportunity>.from(forExchange);
+        localized = List<Opportunity>.from(merged);
       } else {
         localized = <Opportunity>[];
-        for (final item in forExchange) {
+        for (final item in merged) {
           localized.add(await localize(item, locale: locale));
         }
       }
@@ -67,6 +86,23 @@ class OpportunityRepository {
     OpportunityType type, {
     bool forceRefresh = false,
   }) async {
+    if (type == OpportunityType.tradingContest) {
+      final live = await _liveContests(
+        forceRefresh: forceRefresh,
+      );
+      final locale = _activeLocale;
+      if (locale == 'ko') {
+        final sorted = List<Opportunity>.from(live)..sort(_byEndingSoon);
+        return sorted;
+      }
+      final localized = <Opportunity>[];
+      for (final item in live) {
+        localized.add(await localize(item, locale: locale));
+      }
+      localized.sort(_byEndingSoon);
+      return localized;
+    }
+
     final locale = _activeLocale;
     final cacheKey = 'type:${type.wire}|$locale';
     if (forceRefresh) {
@@ -146,11 +182,69 @@ class OpportunityRepository {
     );
   }
 
+  Future<List<Opportunity>> _liveContests({
+    List<Exchange>? exchanges,
+    bool forceRefresh = false,
+  }) async {
+    final scope = exchanges ?? Exchange.values;
+    final useGlobalCache = exchanges == null ||
+        (exchanges.length == Exchange.values.length);
+
+    if (useGlobalCache &&
+        !forceRefresh &&
+        _liveContestCache != null &&
+        _liveContestFetchedAt != null &&
+        DateTime.now().difference(_liveContestFetchedAt!) <= _liveContestTtl) {
+      return List<Opportunity>.from(_liveContestCache!);
+    }
+
+    final eventsService = _events ?? ExchangeEventsService();
+    final pages = await Future.wait(
+      scope.map((exchange) async {
+        try {
+          return await eventsService.loadEvents(
+            exchange,
+            limit: ExchangeEventFetchers.defaultPageSize,
+            forceRefresh: forceRefresh,
+          );
+        } catch (error) {
+          debugPrint(
+            '[OpportunityRepository] contest fetch ${exchange.name}: $error',
+          );
+          return null;
+        }
+      }),
+    );
+
+    final seen = <String>{};
+    final contests = <Opportunity>[];
+    for (final page in pages) {
+      if (page == null) continue;
+      for (final event in page.items) {
+        if (!ContestMatcher.looksLikeContest(event)) continue;
+        final opp = ContestMatcher.toOpportunity(event);
+        if (opp.status == OpportunityStatus.ended) continue;
+        if (!seen.add(opp.officialUrl.isNotEmpty ? opp.officialUrl : opp.id)) {
+          continue;
+        }
+        contests.add(opp);
+      }
+    }
+    contests.sort(_byEndingSoon);
+    asOf = DateTime.now().toUtc();
+
+    if (useGlobalCache) {
+      _liveContestCache = contests;
+      _liveContestFetchedAt = DateTime.now();
+    }
+    return contests;
+  }
+
   Future<List<Opportunity>> _loadRaw() async {
     if (_rawCache != null) return _rawCache!;
     final raw = await rootBundle.loadString(assetPath);
     final body = jsonDecode(raw) as Map<String, dynamic>;
-    asOf = DateTime.tryParse(body['asOf']?.toString() ?? '');
+    asOf = DateTime.tryParse(body['asOf']?.toString() ?? '') ?? asOf;
     final items = (body['items'] as List<dynamic>? ?? [])
         .cast<Map<String, dynamic>>()
         .map(Opportunity.fromJson)

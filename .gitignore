@@ -43,3 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Store credentials / local deploy env
+deployment-kit/**/.env
+deployment-kit/play-metadata/node_modules/
+ios/fastlane/report.xml
+ios/fastlane/Preview.html
+ios/fastlane/screenshots/**/*.png
+ios/*.mobileprovision
+android/fastlane/report.xml

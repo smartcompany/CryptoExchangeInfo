@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_labels.dart';
 import '../models/earn_product.dart';
+import '../services/exchange_referral.dart';
 
 class EarnProductCard extends StatelessWidget {
   const EarnProductCard({super.key, required this.product});
@@ -159,8 +160,8 @@ class EarnProductCard extends StatelessWidget {
   Future<void> _openEarnPage(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final raw = product.earnPageUrl;
-    final uri = raw == null ? null : Uri.tryParse(raw);
-    if (uri == null) {
+    final parsed = raw == null ? null : Uri.tryParse(raw);
+    if (parsed == null) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -168,6 +169,7 @@ class EarnProductCard extends StatelessWidget {
       }
       return;
     }
+    final uri = ExchangeReferral.apply(parsed);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(

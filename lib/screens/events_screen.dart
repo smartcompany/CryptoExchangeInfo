@@ -14,6 +14,7 @@ import '../widgets/event_card.dart';
 import '../widgets/exchange_banner.dart';
 import '../widgets/opportunity_card.dart';
 import 'earning_screen.dart';
+import 'push_settings_screen.dart';
 
 enum HomeSection { events, contests, earning }
 
@@ -70,7 +71,6 @@ class _EventsScreenState extends State<EventsScreen> {
     Exchange.bitget,
     Exchange.kucoin,
     Exchange.coinbase,
-    Exchange.htx,
     Exchange.upbit,
     Exchange.bithumb,
   ];
@@ -80,7 +80,8 @@ class _EventsScreenState extends State<EventsScreen> {
     super.initState();
     _ownsService = widget.service == null;
     _service = widget.service ?? ExchangeEventsService();
-    _opportunities = widget.opportunityRepository ?? OpportunityRepository();
+    _opportunities = widget.opportunityRepository ??
+        OpportunityRepository(events: _service);
     _pageController = PageController(initialPage: _exchangeIndex);
   }
 
@@ -142,12 +143,10 @@ class _EventsScreenState extends State<EventsScreen> {
 
   void _selectExchange(int index) {
     if (index == _exchangeIndex) return;
+    // Jump instead of animate: animateToPage visits in-between pages and
+    // onPageChanged briefly selects them (e.g. Bybit → Binance flashes OKX).
     setState(() => _exchangeIndex = index);
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
+    _pageController.jumpToPage(index);
   }
 
   @override
@@ -231,8 +230,10 @@ class _EventsScreenState extends State<EventsScreen> {
             IconButton(
               tooltip: l10n.notificationsTooltip,
               onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.notificationsComingSoon)),
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const PushSettingsScreen(),
+                  ),
                 );
               },
               icon: const Icon(
@@ -243,8 +244,13 @@ class _EventsScreenState extends State<EventsScreen> {
           ],
         ],
       ),
-      body: switch (_section) {
-        HomeSection.events => Column(
+      // Keep sections mounted so PageView / pane state survives section switches.
+      // Rebuilding events via `switch` disposed the PageView and wiped tab content.
+      body: IndexedStack(
+        index: _section.index,
+        sizing: StackFit.expand,
+        children: [
+          Column(
             children: [
               _ExchangePillBar(
                 exchanges: _tabs,
@@ -271,13 +277,14 @@ class _EventsScreenState extends State<EventsScreen> {
               ),
             ],
           ),
-        HomeSection.contests => _TradingContestsPane(
+          _TradingContestsPane(
             opportunities: _opportunities,
             searchQuery: _searchQuery,
-            active: true,
+            active: _section == HomeSection.contests,
           ),
-        HomeSection.earning => const EarningScreen(),
-      },
+          const EarningScreen(),
+        ],
+      ),
     );
   }
 }

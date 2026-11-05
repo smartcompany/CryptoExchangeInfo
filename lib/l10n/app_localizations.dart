@@ -162,6 +162,120 @@ abstract class AppLocalizations {
   /// **'Notifications are coming soon.'**
   String get notificationsComingSoon;
 
+  /// No description provided for @pushSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Push alerts'**
+  String get pushSettingsTitle;
+
+  /// No description provided for @pushSettingsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Get notified about useful exchange opportunities without opening the app. Turn on only what you care about.'**
+  String get pushSettingsIntro;
+
+  /// No description provided for @pushMasterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Opportunity alerts'**
+  String get pushMasterTitle;
+
+  /// No description provided for @pushMasterSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Master switch for push notifications'**
+  String get pushMasterSubtitle;
+
+  /// No description provided for @pushPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Notification permission was denied.'**
+  String get pushPermissionDenied;
+
+  /// No description provided for @pushCategoriesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'What to receive'**
+  String get pushCategoriesSection;
+
+  /// No description provided for @pushExchangesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Which exchanges'**
+  String get pushExchangesSection;
+
+  /// No description provided for @pushExchangesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts only fire when both a category and an exchange are enabled.'**
+  String get pushExchangesHint;
+
+  /// No description provided for @pushOtherExchangesNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Other exchanges (Gate, MEXC, …) are not covered by server polling yet.'**
+  String get pushOtherExchangesNote;
+
+  /// No description provided for @pushCatContest.
+  ///
+  /// In en, this message translates to:
+  /// **'Trading contests'**
+  String get pushCatContest;
+
+  /// No description provided for @pushCatContestDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Volume / PnL contests and reward campaigns'**
+  String get pushCatContestDesc;
+
+  /// No description provided for @pushCatEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn · APR boosts'**
+  String get pushCatEarn;
+
+  /// No description provided for @pushCatEarnDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible / Fixed earn promos and Launchpool-style offers'**
+  String get pushCatEarnDesc;
+
+  /// No description provided for @pushCatListing.
+  ///
+  /// In en, this message translates to:
+  /// **'New listings · Launchpad'**
+  String get pushCatListing;
+
+  /// No description provided for @pushCatListingDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Listing and launch announcements'**
+  String get pushCatListingDesc;
+
+  /// No description provided for @pushCatDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'Deposit · signup bonuses'**
+  String get pushCatDeposit;
+
+  /// No description provided for @pushCatDepositDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome and deposit bonus campaigns (can be noisy)'**
+  String get pushCatDepositDesc;
+
+  /// No description provided for @pushCatOther.
+  ///
+  /// In en, this message translates to:
+  /// **'Other campaigns'**
+  String get pushCatOther;
+
+  /// No description provided for @pushCatOtherDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Fee discounts, convert challenges, and the rest'**
+  String get pushCatOtherDesc;
+
   /// No description provided for @refreshTooltip.
   ///
   /// In en, this message translates to:
@@ -546,6 +660,72 @@ abstract class AppLocalizations {
   /// **'View original'**
   String get viewOriginal;
 
+  /// No description provided for @bannerSignUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign up'**
+  String get bannerSignUp;
+
+  /// No description provided for @appIconExperimentTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon experiment'**
+  String get appIconExperimentTooltip;
+
+  /// No description provided for @appIconExperimentTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon experiment'**
+  String get appIconExperimentTitle;
+
+  /// No description provided for @appIconExperimentBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Hub or Portal as the home-screen icon. You can switch anytime.'**
+  String get appIconExperimentBody;
+
+  /// No description provided for @appIconHub.
+  ///
+  /// In en, this message translates to:
+  /// **'Hub'**
+  String get appIconHub;
+
+  /// No description provided for @appIconPortal.
+  ///
+  /// In en, this message translates to:
+  /// **'Portal'**
+  String get appIconPortal;
+
+  /// No description provided for @appIconSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Selected'**
+  String get appIconSelected;
+
+  /// No description provided for @appIconChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon updated.'**
+  String get appIconChanged;
+
+  /// No description provided for @appIconChangedAndroid.
+  ///
+  /// In en, this message translates to:
+  /// **'App icon will update after you leave the app.'**
+  String get appIconChangedAndroid;
+
+  /// No description provided for @appIconUnsupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Icon switching isn’t supported on this device.'**
+  String get appIconUnsupported;
+
+  /// No description provided for @appIconChangeFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t change icon: {error}'**
+  String appIconChangeFailed(String error);
+
   /// No description provided for @adConfirmTitle.
   ///
   /// In en, this message translates to:
@@ -762,12 +942,6 @@ abstract class AppLocalizations {
   /// **'Coinbase'**
   String get exchangeCoinbase;
 
-  /// No description provided for @exchangeHtx.
-  ///
-  /// In en, this message translates to:
-  /// **'HTX'**
-  String get exchangeHtx;
-
   /// No description provided for @bannerGateTitle.
   ///
   /// In en, this message translates to:
@@ -815,18 +989,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Status updates and scheduled maintenance'**
   String get bannerCoinbaseBody;
-
-  /// No description provided for @bannerHtxTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'HTX activities'**
-  String get bannerHtxTitle;
-
-  /// No description provided for @bannerHtxBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Latest campaigns and platform rewards'**
-  String get bannerHtxBody;
 }
 
 class _AppLocalizationsDelegate

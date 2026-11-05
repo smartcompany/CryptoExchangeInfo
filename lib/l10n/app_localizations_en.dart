@@ -39,6 +39,69 @@ class AppLocalizationsEn extends AppLocalizations {
   String get notificationsComingSoon => 'Notifications are coming soon.';
 
   @override
+  String get pushSettingsTitle => 'Push alerts';
+
+  @override
+  String get pushSettingsIntro =>
+      'Get notified about useful exchange opportunities without opening the app. Turn on only what you care about.';
+
+  @override
+  String get pushMasterTitle => 'Opportunity alerts';
+
+  @override
+  String get pushMasterSubtitle => 'Master switch for push notifications';
+
+  @override
+  String get pushPermissionDenied => 'Notification permission was denied.';
+
+  @override
+  String get pushCategoriesSection => 'What to receive';
+
+  @override
+  String get pushExchangesSection => 'Which exchanges';
+
+  @override
+  String get pushExchangesHint =>
+      'Alerts only fire when both a category and an exchange are enabled.';
+
+  @override
+  String get pushOtherExchangesNote =>
+      'Other exchanges (Gate, MEXC, …) are not covered by server polling yet.';
+
+  @override
+  String get pushCatContest => 'Trading contests';
+
+  @override
+  String get pushCatContestDesc => 'Volume / PnL contests and reward campaigns';
+
+  @override
+  String get pushCatEarn => 'Earn · APR boosts';
+
+  @override
+  String get pushCatEarnDesc =>
+      'Flexible / Fixed earn promos and Launchpool-style offers';
+
+  @override
+  String get pushCatListing => 'New listings · Launchpad';
+
+  @override
+  String get pushCatListingDesc => 'Listing and launch announcements';
+
+  @override
+  String get pushCatDeposit => 'Deposit · signup bonuses';
+
+  @override
+  String get pushCatDepositDesc =>
+      'Welcome and deposit bonus campaigns (can be noisy)';
+
+  @override
+  String get pushCatOther => 'Other campaigns';
+
+  @override
+  String get pushCatOtherDesc =>
+      'Fee discounts, convert challenges, and the rest';
+
+  @override
   String get refreshTooltip => 'Refresh';
 
   @override
@@ -245,6 +308,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get viewOriginal => 'View original';
 
   @override
+  String get bannerSignUp => 'Sign up';
+
+  @override
+  String get appIconExperimentTooltip => 'App icon experiment';
+
+  @override
+  String get appIconExperimentTitle => 'App icon experiment';
+
+  @override
+  String get appIconExperimentBody =>
+      'Try Hub or Portal as the home-screen icon. You can switch anytime.';
+
+  @override
+  String get appIconHub => 'Hub';
+
+  @override
+  String get appIconPortal => 'Portal';
+
+  @override
+  String get appIconSelected => 'Selected';
+
+  @override
+  String get appIconChanged => 'App icon updated.';
+
+  @override
+  String get appIconChangedAndroid =>
+      'App icon will update after you leave the app.';
+
+  @override
+  String get appIconUnsupported =>
+      'Icon switching isn’t supported on this device.';
+
+  @override
+  String appIconChangeFailed(String error) {
+    return 'Couldn’t change icon: $error';
+  }
+
+  @override
   String get adConfirmTitle => 'AI summary';
 
   @override
@@ -367,9 +468,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get exchangeCoinbase => 'Coinbase';
 
   @override
-  String get exchangeHtx => 'HTX';
-
-  @override
   String get bannerGateTitle => 'Listings & campaigns';
 
   @override
@@ -393,10 +491,4 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bannerCoinbaseBody => 'Status updates and scheduled maintenance';
-
-  @override
-  String get bannerHtxTitle => 'HTX activities';
-
-  @override
-  String get bannerHtxBody => 'Latest campaigns and platform rewards';
 }

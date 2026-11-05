@@ -8,6 +8,7 @@ import '../models/exchange_event.dart';
 import '../services/ad_gate.dart';
 import '../services/event_ai_service.dart';
 import '../services/exchange_events_service.dart';
+import '../services/exchange_referral.dart';
 import '../theme/app_colors.dart';
 import 'ai_summary_button.dart';
 import 'event_ai_sheet.dart';
@@ -113,9 +114,7 @@ class _EventCardState extends State<EventCard> {
         vertical: 8,
       ),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () => _openExternal(context),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (showThumb)
@@ -234,7 +233,6 @@ class _EventCardState extends State<EventCard> {
             ),
           ],
         ),
-      ),
     );
   }
 
@@ -280,10 +278,10 @@ class _EventCardState extends State<EventCard> {
 
   Future<void> _openExternal(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final uri = Uri.tryParse(event.url.trim());
-    if (uri == null ||
-        (uri.scheme != 'http' && uri.scheme != 'https') ||
-        uri.host.isEmpty) {
+    final parsed = Uri.tryParse(event.url.trim());
+    if (parsed == null ||
+        (parsed.scheme != 'http' && parsed.scheme != 'https') ||
+        parsed.host.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -291,6 +289,7 @@ class _EventCardState extends State<EventCard> {
       }
       return;
     }
+    final uri = ExchangeReferral.apply(parsed);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(

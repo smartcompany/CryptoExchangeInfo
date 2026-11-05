@@ -1,0 +1,29 @@
+{
+  "appName": "Exora - Crypto Exchange Hub",
+  "bundleId": "com.smartcompany.cryptoExchangeInfo",
+  "sku": "com.smartcompany.cryptoExchangeInfo",
+  "packageName": "com.smartcompany.cryptoExchangeInfo",
+  "serverBaseUrl": "https://cryptoexchangeinfoserver.vercel.app",
+  "privacyPath": "/privacy",
+  "supportUrl": "https://smartcompany.github.io",
+  "marketingUrl": "https://smartcompany.github.io",
+  "copyright": "2026 Yong Geon Kim. All rights reserved.",
+  "supportEmail": "gunnylove@gmail.com",
+  "reviewContactFirstName": "Yong Geon",
+  "reviewContactLastName": "Kim",
+  "reviewContactEmail": "gunnylove@gmail.com",
+  "reviewContactPhone": "+821065912052",
+  "appleId": "gunnylove@gmail.com",
+  "itcTeamId": "117828562",
+  "developerTeamId": "NTCK5U8AWD",
+  "appleAppId": "6830551438",
+  "ascKeyId": "7FN57R567Z",
+  "ascKeyPath": "/Users/smart/Projects/auth/fastlaneAuthKeys/AuthKey_7FN57R567Z.p8",
+  "androidKeystorePath": "/Users/smart/Projects/auth/androidKey/my-release-key.jks",
+  "androidKeyAlias": "my-key-alias",
+  "notes": [
+    "In-app / home screen name: Exora",
+    "App Store listing name: Exora - Crypto Exchange Hub",
+    "API default: Cloudflare Workers; metadata privacy URL uses Vercel for stable static hosting."
+  ]
+}

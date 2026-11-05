@@ -1,0 +1,36 @@
+App Review Notes — Exora (Exora - Crypto Exchange Hub)
+Bundle ID: com.smartcompany.cryptoExchangeInfo
+
+1) CORE FLOW
+• Launch → Home / Events: paginated exchange sections (Binance, OKX, Bybit, etc.).
+• Browse event/opportunity cards; open detail; optional AI summary if network available.
+• Switch section to Earn for Flexible USDT lists where supported.
+• Banner “Join” opens the exchange signup URL (referral) in Safari / external browser.
+N/A: no login/registration; no IAP/subscriptions; no social UGC; no Location/Contacts/ATT required for core use.
+
+2) DEVICES & OS TESTED
+• iPhone 15 Pro — iOS 18.x
+• iPhone 14 — iOS 18.x
+Validated with current Xcode / iOS SDK for this binary.
+
+3) PURPOSE & AUDIENCE
+Information hub for crypto exchange campaigns and Flexible Earn APRs. Target: general users who follow CEX events. The app does not place trades.
+
+4) ACCESS / SETUP (NO LOGIN)
+Demo account NOT required. Reviewer steps: open app → browse events → open a card → (optional) AI analyze → open Earn section → tap Join on a banner to verify external link.
+Privacy: https://cryptoexchangeinfoserver.vercel.app/privacy
+Support: https://smartcompany.github.io
+
+5) EXTERNAL SERVICES
+• Exchange public HTTP APIs (events/earn/images) called from the device
+• Our API (settings / optional Gemini event analysis) on Vercel or Cloudflare Workers
+• Google Mobile Ads (AdMob)
+• Optional Firebase / Crashlytics when enabled in the build
+
+6) REGIONAL DIFFERENCES
+Same features; UI localized (ko / en / ja / zh).
+
+7) REGULATED / FINANCIAL
+Informational only — not a broker, wallet, or trading venue. No custody of crypto assets.
+
+Thank you for reviewing Exora.

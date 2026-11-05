@@ -8,6 +8,9 @@ import 'event_image_resolver.dart';
 import 'exchange_event_fetchers.dart';
 import 'translate_service.dart';
 
+/// Host for settings + AI analyze (not exchange scraping).
+enum ApiBackend { vercel, cloudflare, railway }
+
 enum Exchange {
   binance,
   okx,
@@ -17,7 +20,6 @@ enum Exchange {
   bitget,
   kucoin,
   coinbase,
-  htx,
   upbit,
   bithumb,
 }
@@ -32,7 +34,6 @@ extension ExchangeX on Exchange {
     Exchange.bitget => 'Bitget',
     Exchange.kucoin => 'KuCoin',
     Exchange.coinbase => 'Coinbase',
-    Exchange.htx => 'HTX',
     Exchange.upbit => '업비트',
     Exchange.bithumb => '빗썸',
   };
@@ -78,9 +79,32 @@ class ExchangeEventsService {
   final EventImageResolver _images;
   final Duration cacheTtl;
 
-  /// Vercel server (settings / AI analyze only).
-  static const productionApiBaseUrl =
+  /// Backend that serves `/api/settings` + `/api/event-analyze`.
+  /// Flip [activeApiBackend] or pass `--dart-define=EXORA_API_BACKEND=railway`.
+  static const ApiBackend activeApiBackend = ApiBackend.railway;
+
+  static const vercelApiBaseUrl =
       'https://cryptoexchangeinfoserver.vercel.app';
+  static const cloudflareApiBaseUrl =
+      'https://cryptoexchangeinfoserver.gunnylove.workers.dev';
+  static const railwayApiBaseUrl =
+      'https://cryptoexchangeinfoserver-production.up.railway.app';
+
+  /// Resolved API base (no trailing slash).
+  static String get productionApiBaseUrl {
+    const fromDefine = String.fromEnvironment('EXORA_API_BACKEND');
+    final backend = switch (fromDefine.trim().toLowerCase()) {
+      'cloudflare' || 'cf' || 'workers' => ApiBackend.cloudflare,
+      'vercel' => ApiBackend.vercel,
+      'railway' || 'rail' => ApiBackend.railway,
+      _ => activeApiBackend,
+    };
+    return switch (backend) {
+      ApiBackend.vercel => vercelApiBaseUrl,
+      ApiBackend.cloudflare => cloudflareApiBaseUrl,
+      ApiBackend.railway => railwayApiBaseUrl,
+    };
+  }
 
   String get _activeLocale => TranslateService.normalizeLang(
     PlatformDispatcher.instance.locale.languageCode,

@@ -1,9 +1,48 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../l10n/l10n_labels.dart';
 import '../services/exchange_events_service.dart';
+import '../services/exchange_referral.dart';
 import '../theme/app_colors.dart';
+
+/// Room for the bottom-right glyph row so copy does not overlap it.
+const double _bannerCopyRightInset = 152;
+
+String? _bannerDestination(Exchange exchange) {
+  final signup = ExchangeReferral.signupLink(exchange.name);
+  if (signup != null && signup.trim().isNotEmpty) return signup.trim();
+  return switch (exchange) {
+    Exchange.upbit => 'https://upbit.com',
+    Exchange.bithumb => 'https://www.bithumb.com',
+    _ => null,
+  };
+}
+
+Future<void> _openBannerDestination(
+  BuildContext context,
+  Exchange exchange,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final parsed = Uri.tryParse(_bannerDestination(exchange) ?? '');
+  if (parsed == null ||
+      (parsed.scheme != 'http' && parsed.scheme != 'https') ||
+      parsed.host.isEmpty) {
+    if (context.mounted) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.invalidLink)));
+    }
+    return;
+  }
+  final ok = await launchUrl(parsed, mode: LaunchMode.externalApplication);
+  if (!ok && context.mounted) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.cannotOpenLink)));
+  }
+}
 
 class ExchangeBanner extends StatelessWidget {
   const ExchangeBanner({super.key, required this.exchange});
@@ -28,7 +67,6 @@ class ExchangeBanner extends StatelessWidget {
         Exchange.bitget => const _BitgetBanner(),
         Exchange.kucoin => const _KucoinBanner(),
         Exchange.coinbase => const _CoinbaseBanner(),
-        Exchange.htx => const _HtxBanner(),
         Exchange.upbit => const _UpbitBanner(),
         Exchange.bithumb => const _BithumbBanner(),
       },
@@ -38,26 +76,106 @@ class ExchangeBanner extends StatelessWidget {
 
 class _BannerShell extends StatelessWidget {
   const _BannerShell({
+    required this.exchange,
     required this.gradient,
     required this.child,
     this.border,
+    this.signupForeground,
+    this.signupBackground,
+    this.signupBorder,
   });
 
+  final Exchange exchange;
   final Gradient gradient;
   final Widget child;
   final BoxBorder? border;
+  final Color? signupForeground;
+  final Color? signupBackground;
+  final Color? signupBorder;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 132),
-      decoration: BoxDecoration(
+    final hasSignup = ExchangeReferral.signupLink(exchange.name) != null;
+    final canOpen = _bannerDestination(exchange) != null;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: canOpen ? () => _openBannerDestination(context, exchange) : null,
         borderRadius: BorderRadius.circular(20),
-        gradient: gradient,
-        border: border,
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: gradient,
+            border: border,
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 132),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Stack(
+                children: [
+                  child,
+                  if (hasSignup)
+                    Positioned(
+                      right: 14,
+                      top: 14,
+                      child: _BannerSignupCta(
+                        exchange,
+                        foreground: signupForeground,
+                        background: signupBackground,
+                        border: signupBorder,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
-      clipBehavior: Clip.antiAlias,
-      child: child,
+    );
+  }
+}
+
+class _BannerSignupCta extends StatelessWidget {
+  const _BannerSignupCta(
+    this.exchange, {
+    this.foreground,
+    this.background,
+    this.border,
+  });
+
+  final Exchange exchange;
+  final Color? foreground;
+  final Color? background;
+  final Color? border;
+
+  @override
+  Widget build(BuildContext context) {
+    if (ExchangeReferral.signupLink(exchange.name) == null) {
+      return const SizedBox.shrink();
+    }
+    final l10n = AppLocalizations.of(context);
+    final fg = foreground ?? Colors.white;
+    final bg = background ?? Colors.white.withValues(alpha: 0.16);
+    final edge = border ?? Colors.white.withValues(alpha: 0.38);
+    return FilledButton(
+      onPressed: () => _openBannerDestination(context, exchange),
+      style: FilledButton.styleFrom(
+        backgroundColor: bg,
+        foregroundColor: fg,
+        elevation: 0,
+        shadowColor: Colors.transparent,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        minimumSize: const Size(0, 36),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        visualDensity: VisualDensity.compact,
+        side: BorderSide(color: edge),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+      ),
+      child: Text(
+        l10n.bannerSignUp,
+        style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14),
+      ),
     );
   }
 }
@@ -121,6 +239,7 @@ class _BybitBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.bybit,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -138,7 +257,7 @@ class _BybitBanner extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.candlestick_chart_outlined,
@@ -147,7 +266,7 @@ class _BybitBanner extends StatelessWidget {
             ], color: const Color(0xFFF7A600)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,6 +315,7 @@ class _BinanceBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.binance,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -220,7 +340,7 @@ class _BinanceBanner extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.card_giftcard_rounded,
@@ -229,7 +349,7 @@ class _BinanceBanner extends StatelessWidget {
             ], color: AppColors.bannerMist),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -279,6 +399,7 @@ class _OkxBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.okx,
       gradient: const LinearGradient(
         begin: Alignment.centerLeft,
         end: Alignment.centerRight,
@@ -308,8 +429,8 @@ class _OkxBanner extends StatelessWidget {
             ),
           ),
           const Positioned(
-            right: 18,
-            bottom: 18,
+            right: 14,
+            bottom: 16,
             child: _GlyphRow([
               Icons.grid_view_rounded,
               Icons.show_chart,
@@ -317,7 +438,7 @@ class _OkxBanner extends StatelessWidget {
             ], color: Color(0xFF79B8FF)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -366,6 +487,7 @@ class _UpbitBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.upbit,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -389,7 +511,7 @@ class _UpbitBanner extends StatelessWidget {
             ),
           ),
           const Positioned(
-            right: 18,
+            right: 14,
             bottom: 16,
             child: _GlyphRow([
               Icons.notifications_active_outlined,
@@ -398,7 +520,7 @@ class _UpbitBanner extends StatelessWidget {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -443,6 +565,7 @@ class _BithumbBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.bithumb,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -460,7 +583,7 @@ class _BithumbBanner extends StatelessWidget {
             ),
           ),
           const Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow([
               Icons.campaign_outlined,
@@ -469,7 +592,7 @@ class _BithumbBanner extends StatelessWidget {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,6 +641,7 @@ class _BitgetBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.bitget,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -535,7 +659,7 @@ class _BitgetBanner extends StatelessWidget {
             ),
           ),
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.swipe_rounded,
@@ -544,7 +668,7 @@ class _BitgetBanner extends StatelessWidget {
             ], color: const Color(0xFF00F0FF)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,6 +716,10 @@ class _GateBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.gate,
+      signupForeground: Colors.white,
+      signupBackground: const Color(0xFF063D31),
+      signupBorder: const Color(0xFF063D31),
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -600,7 +728,7 @@ class _GateBanner extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.emoji_events_outlined,
@@ -609,7 +737,7 @@ class _GateBanner extends StatelessWidget {
             ], color: const Color(0xFF063D31)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -658,6 +786,7 @@ class _MexcBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.mexc,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -666,7 +795,7 @@ class _MexcBanner extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.bolt_rounded,
@@ -675,7 +804,7 @@ class _MexcBanner extends StatelessWidget {
             ], color: const Color(0xFF1EE3A0)),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -720,6 +849,7 @@ class _KucoinBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.kucoin,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -728,7 +858,7 @@ class _KucoinBanner extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.savings_outlined,
@@ -737,7 +867,7 @@ class _KucoinBanner extends StatelessWidget {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -782,6 +912,7 @@ class _CoinbaseBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return _BannerShell(
+      exchange: Exchange.coinbase,
       gradient: const LinearGradient(
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
@@ -790,7 +921,7 @@ class _CoinbaseBanner extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            right: 16,
+            right: 14,
             bottom: 16,
             child: _GlyphRow(const [
               Icons.shield_outlined,
@@ -799,7 +930,7 @@ class _CoinbaseBanner extends StatelessWidget {
             ]),
           ),
           Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
+            padding: const EdgeInsets.fromLTRB(18, 18, _bannerCopyRightInset, 18),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -825,68 +956,6 @@ class _CoinbaseBanner extends StatelessWidget {
                 Text(
                   l10n.bannerCoinbaseBody,
                   style: const TextStyle(color: Color(0xFFD6E4FF), fontSize: 13),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HtxBanner extends StatelessWidget {
-  const _HtxBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    return _BannerShell(
-      gradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF1F1A17), Color(0xFF3A2A1C)],
-      ),
-      child: Stack(
-        children: [
-          Positioned(
-            right: 16,
-            bottom: 16,
-            child: _GlyphRow(const [
-              Icons.card_giftcard_rounded,
-              Icons.local_activity_outlined,
-              Icons.stars_outlined,
-            ], color: const Color(0xFFE6A23C)),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(18, 18, 120, 18),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Tag(
-                  l10n.exchangeName(Exchange.htx),
-                  fg: const Color(0xFF1F1A17),
-                  bg: const Color(0xFFE6A23C),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  l10n.bannerHtxTitle,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  l10n.bannerHtxBody,
-                  style: const TextStyle(color: Color(0xFFE8D5B5), fontSize: 13),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),

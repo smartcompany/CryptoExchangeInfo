@@ -23,13 +23,24 @@ class EarnService {
     'Accept-Language': 'en-US,en;q=0.9,ko;q=0.8',
   };
 
+  /// Client-side live Flexible USDT rates for every tab exchange.
   Future<FlexibleUsdtEarnResult> fetchFlexibleUsdt() async {
     final results = await Future.wait([
-      _fetchBybit(),
       _fetchBinance(),
+      _fetchBybit(),
       _fetchOkx(),
+      _fetchGate(),
       Future.value(
-        _unavailable(exchange: 'bitget', note: 'unavailable_bitget'),
+        _unavailable(exchange: 'mexc', note: 'unavailable_public_api'),
+      ),
+      Future.value(
+        _unavailable(exchange: 'bitget', note: 'unavailable_auth_required'),
+      ),
+      Future.value(
+        _unavailable(exchange: 'kucoin', note: 'unavailable_auth_required'),
+      ),
+      Future.value(
+        _unavailable(exchange: 'coinbase', note: 'unavailable_no_flexible_usdt'),
       ),
       Future.value(_unavailable(exchange: 'upbit', note: 'unavailable_upbit')),
       Future.value(
@@ -38,8 +49,8 @@ class EarnService {
     ]);
 
     results.sort((a, b) {
-      final ap = a.aprPercent ?? -1;
-      final bp = b.aprPercent ?? -1;
+      final ap = a.available ? (a.aprPercent ?? -1) : -2;
+      final bp = b.available ? (b.aprPercent ?? -1) : -2;
       return bp.compareTo(ap);
     });
 
@@ -250,6 +261,59 @@ class EarnService {
       });
     } catch (e) {
       return _unavailable(exchange: 'okx', note: e.toString());
+    }
+  }
+
+  /// Gate Uni public hourly rate → approximate APR%.
+  Future<EarnProduct> _fetchGate() async {
+    try {
+      final uri = Uri.parse(
+        'https://api.gateio.ws/api/v4/earn/uni/currencies/USDT',
+      );
+      final res = await _client
+          .get(uri, headers: _browserHeaders)
+          .timeout(const Duration(seconds: 20));
+      if (res.statusCode != 200) {
+        return _unavailable(
+          exchange: 'gate',
+          note: 'Gate HTTP ${res.statusCode}',
+        );
+      }
+      final body = jsonDecode(res.body);
+      final raw = body is Map<String, dynamic>
+          ? body
+          : (body is List && body.isNotEmpty
+                ? body.first as Map<String, dynamic>
+                : <String, dynamic>{});
+      if (raw.isEmpty) {
+        return _unavailable(exchange: 'gate', note: 'No USDT Uni product');
+      }
+      final maxHourly = _asDouble(raw['max_rate']);
+      final minHourly = _asDouble(raw['min_rate']);
+      // Gate Uni lend rate is hourly; APR% ≈ hourly * 24 * 365 * 100.
+      final aprPercent =
+          maxHourly == null ? null : maxHourly * 24 * 365 * 100;
+      final minApr =
+          minHourly == null ? null : minHourly * 24 * 365 * 100;
+      return EarnProduct.fromJson({
+        'exchange': 'gate',
+        'coin': 'USDT',
+        'productType': 'flexible',
+        'available': aprPercent != null,
+        'aprPercent': aprPercent,
+        'aprDisplay': aprPercent == null ? null : '${_fmtPct(aprPercent)}%',
+        'avgAprDisplay': minApr == null ? null : '${_fmtPct(minApr)}%',
+        'minAmount': raw['min_lend_amount']?.toString(),
+        'maxAmount': raw['max_lend_amount']?.toString(),
+        'status': 'Available',
+        'productId': 'uni-usdt',
+        'hasTieredApr': false,
+        'tiers': <Map<String, dynamic>>[],
+        'note':
+            'Gate Simple Earn / Uni approximate APR from public hourly max rate.',
+      });
+    } catch (e) {
+      return _unavailable(exchange: 'gate', note: e.toString());
     }
   }
 

@@ -1,0 +1,132 @@
+require "shellwords"
+
+app_store_connect_api_key(
+  key_id: "7FN57R567Z",
+  issuer_id: "69a6de88-7946-47e3-e053-5b8c7c11a4d1",
+  key_filepath: "/Users/smart/Projects/auth/fastlaneAuthKeys/AuthKey_7FN57R567Z.p8"
+)
+
+default_platform(:ios)
+
+platform :ios do
+  desc "Create App ID + App Store Connect app if missing"
+  lane :ensure_app do
+    produce(
+      app_identifier: "com.smartcompany.cryptoExchangeInfo",
+      app_name: "Exora - Crypto Exchange Hub",
+      sku: "com.smartcompany.cryptoExchangeInfo",
+      language: "en-US",
+      app_version: "1.0",
+      skip_itc: false,
+      skip_devcenter: false,
+      team_id: "NTCK5U8AWD",
+      itc_team_id: "117828562"
+    )
+  end
+
+  desc "Push a new release build to the App Store"
+  lane :release do
+    client_root = File.expand_path("../..", __dir__)
+    Dir.chdir(client_root) do
+      sh("flutter", "clean")
+      sh("flutter", "pub", "get")
+    end
+
+    cocoapods(
+      clean_install: true,
+      repo_update: false,
+      silent: false
+    )
+
+    increment_build_number(xcodeproj: "Runner.xcodeproj")
+
+    get_provisioning_profile(
+      app_identifier: "com.smartcompany.cryptoExchangeInfo",
+      adhoc: false,
+      force: true,
+      skip_install: false,
+      team_id: "NTCK5U8AWD"
+    )
+
+    profile_name = lane_context[SharedValues::SIGH_NAME]
+    begin
+      update_code_signing_settings(
+        use_automatic_signing: false,
+        path: "Runner.xcodeproj",
+        team_id: "NTCK5U8AWD",
+        bundle_identifier: "com.smartcompany.cryptoExchangeInfo",
+        code_sign_identity: "Apple Distribution",
+        profile_name: profile_name,
+        targets: ["Runner"]
+      )
+
+      clean_build_artifacts
+
+      export_opts = {
+        method: "app-store",
+        uploadBitcode: false,
+        uploadSymbols: true,
+        compileBitcode: false,
+        signingStyle: "manual",
+        teamID: "NTCK5U8AWD",
+        provisioningProfiles: {
+          "com.smartcompany.cryptoExchangeInfo" => profile_name
+        }
+      }
+
+      build_app(
+        workspace: "Runner.xcworkspace",
+        scheme: "Runner",
+        export_method: "app-store",
+        clean: true,
+        codesigning_identity: "Apple Distribution: yonggeon kim (NTCK5U8AWD)",
+        export_options: export_opts
+      )
+    ensure
+      update_code_signing_settings(
+        use_automatic_signing: true,
+        path: "Runner.xcodeproj",
+        team_id: "NTCK5U8AWD",
+        bundle_identifier: "com.smartcompany.cryptoExchangeInfo",
+        code_sign_identity: "Apple Development",
+        profile_name: "",
+        targets: ["Runner"]
+      )
+    end
+
+    pods_root = File.expand_path("../Pods", __dir__)
+    upload_binary = [
+      File.join(pods_root, "FirebaseCrashlytics", "upload-symbols"),
+      *Dir.glob(File.join(pods_root, "**", "upload-symbols")),
+    ].find { |path| File.exist?(path) }
+    if upload_binary
+      upload_symbols_to_crashlytics(
+        gsp_path: "Runner/GoogleService-Info.plist",
+        binary_path: upload_binary
+      )
+    else
+      UI.important("Skipping Crashlytics dSYM upload (no upload-symbols)")
+    end
+
+    begin
+      upload_to_app_store(
+        skip_metadata: true,
+        skip_screenshots: true,
+        skip_app_version_update: true,
+        precheck_include_in_app_purchases: false,
+        force: true,
+        submission_information: {
+          export_compliance: {
+            uses_non_exempt_encryption: false
+          }
+        }
+      )
+    rescue => ex
+      if ex.message.include?("UPLOAD SUCCEEDED") || ex.message.include?("Delivery UUID")
+        UI.success("Upload succeeded (metrics noise ignored). Check App Store Connect.")
+      else
+        raise ex
+      end
+    end
+  end
+end

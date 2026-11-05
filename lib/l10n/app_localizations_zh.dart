@@ -39,6 +39,63 @@ class AppLocalizationsZh extends AppLocalizations {
   String get notificationsComingSoon => '通知功能即将推出。';
 
   @override
+  String get pushSettingsTitle => '推送通知';
+
+  @override
+  String get pushSettingsIntro => '即使不打开应用，也能收到有用的交易所机会。只打开你关心的项目。';
+
+  @override
+  String get pushMasterTitle => '机会提醒';
+
+  @override
+  String get pushMasterSubtitle => '推送总开关';
+
+  @override
+  String get pushPermissionDenied => '通知权限被拒绝。';
+
+  @override
+  String get pushCategoriesSection => '接收哪些消息';
+
+  @override
+  String get pushExchangesSection => '哪些交易所';
+
+  @override
+  String get pushExchangesHint => '仅当类别与交易所都开启时才会推送。';
+
+  @override
+  String get pushOtherExchangesNote => 'Gate、MEXC 等交易所暂未纳入服务器轮询。';
+
+  @override
+  String get pushCatContest => '交易大赛';
+
+  @override
+  String get pushCatContestDesc => '交易量/盈亏大赛、奖励活动';
+
+  @override
+  String get pushCatEarn => 'Earn · APR 加成';
+
+  @override
+  String get pushCatEarnDesc => '活期/定期促销、Launchpool 类';
+
+  @override
+  String get pushCatListing => '新上线 · Launchpad';
+
+  @override
+  String get pushCatListingDesc => '上币与启动公告';
+
+  @override
+  String get pushCatDeposit => '入金·注册奖励';
+
+  @override
+  String get pushCatDepositDesc => '欢迎礼与入金奖励（可能较多）';
+
+  @override
+  String get pushCatOther => '其他活动';
+
+  @override
+  String get pushCatOtherDesc => '手续费优惠、闪兑挑战等';
+
+  @override
   String get refreshTooltip => '刷新';
 
   @override
@@ -243,6 +300,41 @@ class AppLocalizationsZh extends AppLocalizations {
   String get viewOriginal => '查看原文';
 
   @override
+  String get bannerSignUp => '注册';
+
+  @override
+  String get appIconExperimentTooltip => '应用图标实验';
+
+  @override
+  String get appIconExperimentTitle => '应用图标实验';
+
+  @override
+  String get appIconExperimentBody => '可在 Hub / Portal 之间切换主屏幕图标，随时可改。';
+
+  @override
+  String get appIconHub => 'Hub';
+
+  @override
+  String get appIconPortal => 'Portal';
+
+  @override
+  String get appIconSelected => '已选';
+
+  @override
+  String get appIconChanged => '应用图标已更新。';
+
+  @override
+  String get appIconChangedAndroid => '离开应用后图标才会生效。';
+
+  @override
+  String get appIconUnsupported => '此设备不支持切换图标。';
+
+  @override
+  String appIconChangeFailed(String error) {
+    return '无法更改图标：$error';
+  }
+
+  @override
   String get adConfirmTitle => 'AI 摘要';
 
   @override
@@ -361,9 +453,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get exchangeCoinbase => 'Coinbase';
 
   @override
-  String get exchangeHtx => 'HTX';
-
-  @override
   String get bannerGateTitle => '上币与活动';
 
   @override
@@ -386,10 +475,4 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get bannerCoinbaseBody => '状态更新与计划维护通知';
-
-  @override
-  String get bannerHtxTitle => 'HTX 活动';
-
-  @override
-  String get bannerHtxBody => '汇总最新活动与奖励';
 }

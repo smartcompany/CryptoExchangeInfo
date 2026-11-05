@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/event_ai_service.dart';
+import '../services/exchange_referral.dart';
 import '../theme/app_colors.dart';
 import 'ai_summary_button.dart';
 
@@ -124,8 +125,9 @@ class EventAiAnalysisPage extends StatelessWidget {
 
   Future<void> _openSource(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final uri = Uri.tryParse(sourceUrl!.trim());
-    if (uri == null) return;
+    final parsed = Uri.tryParse(sourceUrl!.trim());
+    if (parsed == null) return;
+    final uri = ExchangeReferral.apply(parsed);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(

@@ -7,6 +7,7 @@ import '../l10n/l10n_labels.dart';
 import '../models/opportunity.dart';
 import '../services/ad_gate.dart';
 import '../services/event_ai_service.dart';
+import '../services/exchange_referral.dart';
 import '../services/opportunity_repository.dart';
 import '../services/translate_service.dart';
 import '../theme/app_colors.dart';
@@ -398,10 +399,10 @@ class _OpportunityCardState extends State<OpportunityCard> {
 
   Future<void> _openOfficial(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
-    final uri = Uri.tryParse(opportunity.officialUrl.trim());
-    if (uri == null ||
-        (uri.scheme != 'http' && uri.scheme != 'https') ||
-        uri.host.isEmpty) {
+    final parsed = Uri.tryParse(opportunity.officialUrl.trim());
+    if (parsed == null ||
+        (parsed.scheme != 'http' && parsed.scheme != 'https') ||
+        parsed.host.isEmpty) {
       if (context.mounted) {
         ScaffoldMessenger.of(
           context,
@@ -409,6 +410,7 @@ class _OpportunityCardState extends State<OpportunityCard> {
       }
       return;
     }
+    final uri = ExchangeReferral.apply(parsed);
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
     if (!ok && context.mounted) {
       ScaffoldMessenger.of(

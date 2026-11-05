@@ -10,6 +10,25 @@
   "searchCloseTooltip": "关闭搜索",
   "notificationsTooltip": "通知",
   "notificationsComingSoon": "通知功能即将推出。",
+  "pushSettingsTitle": "推送通知",
+  "pushSettingsIntro": "即使不打开应用，也能收到有用的交易所机会。只打开你关心的项目。",
+  "pushMasterTitle": "机会提醒",
+  "pushMasterSubtitle": "推送总开关",
+  "pushPermissionDenied": "通知权限被拒绝。",
+  "pushCategoriesSection": "接收哪些消息",
+  "pushExchangesSection": "哪些交易所",
+  "pushExchangesHint": "仅当类别与交易所都开启时才会推送。",
+  "pushOtherExchangesNote": "Gate、MEXC 等交易所暂未纳入服务器轮询。",
+  "pushCatContest": "交易大赛",
+  "pushCatContestDesc": "交易量/盈亏大赛、奖励活动",
+  "pushCatEarn": "Earn · APR 加成",
+  "pushCatEarnDesc": "活期/定期促销、Launchpool 类",
+  "pushCatListing": "新上线 · Launchpad",
+  "pushCatListingDesc": "上币与启动公告",
+  "pushCatDeposit": "入金·注册奖励",
+  "pushCatDepositDesc": "欢迎礼与入金奖励（可能较多）",
+  "pushCatOther": "其他活动",
+  "pushCatOtherDesc": "手续费优惠、闪兑挑战等",
   "refreshTooltip": "刷新",
   "loadingEvents": "正在加载活动…",
   "loadingEarn": "正在加载灵活 USDT Earn…",
@@ -74,6 +93,24 @@
   "aiSectionCautions": "注意",
   "aiFailed": "AI 分析失败：{error}",
   "viewOriginal": "查看原文",
+  "bannerSignUp": "注册",
+  "appIconExperimentTooltip": "应用图标实验",
+  "appIconExperimentTitle": "应用图标实验",
+  "appIconExperimentBody": "可在 Hub / Portal 之间切换主屏幕图标，随时可改。",
+  "appIconHub": "Hub",
+  "appIconPortal": "Portal",
+  "appIconSelected": "已选",
+  "appIconChanged": "应用图标已更新。",
+  "appIconChangedAndroid": "离开应用后图标才会生效。",
+  "appIconUnsupported": "此设备不支持切换图标。",
+  "appIconChangeFailed": "无法更改图标：{error}",
+  "@appIconChangeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "adConfirmTitle": "AI 摘要",
   "adConfirmMessage": "观看广告后即可查看 AI 摘要。是否继续？",
   "cancel": "取消",
@@ -110,7 +147,6 @@
   "exchangeMexc": "MEXC",
   "exchangeKucoin": "KuCoin",
   "exchangeCoinbase": "Coinbase",
-  "exchangeHtx": "HTX",
   "bannerGateTitle": "上币与活动",
   "bannerGateBody": "集中查看 Gate 促销与交易赛",
   "bannerMexcTitle": "活动雷达",
@@ -118,7 +154,5 @@
   "bannerKucoinTitle": "KuCoin 动态",
   "bannerKucoinBody": "上币、Earn 加成与平台公告",
   "bannerCoinbaseTitle": "交易所公告",
-  "bannerCoinbaseBody": "状态更新与计划维护通知",
-  "bannerHtxTitle": "HTX 活动",
-  "bannerHtxBody": "汇总最新活动与奖励"
+  "bannerCoinbaseBody": "状态更新与计划维护通知"
 }

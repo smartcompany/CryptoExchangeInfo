@@ -39,6 +39,65 @@ class AppLocalizationsKo extends AppLocalizations {
   String get notificationsComingSoon => '알림 기능은 곧 제공됩니다.';
 
   @override
+  String get pushSettingsTitle => '푸시 알림';
+
+  @override
+  String get pushSettingsIntro =>
+      '앱을 켜지 않아도 유용한 거래소 기회를 받아보세요. 관심 있는 항목만 켜 두세요.';
+
+  @override
+  String get pushMasterTitle => '새 기회 알림';
+
+  @override
+  String get pushMasterSubtitle => '푸시 알림 전체 켜기/끄기';
+
+  @override
+  String get pushPermissionDenied => '알림 권한이 거부되었습니다.';
+
+  @override
+  String get pushCategoriesSection => '어떤 소식을 받을까요';
+
+  @override
+  String get pushExchangesSection => '어느 거래소';
+
+  @override
+  String get pushExchangesHint => '카테고리와 거래소를 모두 켠 조합만 알림이 갑니다.';
+
+  @override
+  String get pushOtherExchangesNote =>
+      'Gate, MEXC 등 다른 거래소는 아직 서버 폴링 대상이 아닙니다.';
+
+  @override
+  String get pushCatContest => '거래 대회 / 컨테스트';
+
+  @override
+  String get pushCatContestDesc => '거래량·PNL 대회, 보상 캠페인';
+
+  @override
+  String get pushCatEarn => 'Earn · APR 부스트';
+
+  @override
+  String get pushCatEarnDesc => 'Flexible/Fixed 프로모, Launchpool 성격 이벤트';
+
+  @override
+  String get pushCatListing => '신규 상장 · Launchpad';
+
+  @override
+  String get pushCatListingDesc => '상장·런치 공지';
+
+  @override
+  String get pushCatDeposit => '입금·가입 보너스';
+
+  @override
+  String get pushCatDepositDesc => '웰컴·입금 보너스 (알림이 많을 수 있음)';
+
+  @override
+  String get pushCatOther => '기타 캠페인';
+
+  @override
+  String get pushCatOtherDesc => '수수료 할인, Convert 챌린지 등';
+
+  @override
   String get refreshTooltip => '새로고침';
 
   @override
@@ -243,6 +302,42 @@ class AppLocalizationsKo extends AppLocalizations {
   String get viewOriginal => '원문 보기';
 
   @override
+  String get bannerSignUp => '가입하기';
+
+  @override
+  String get appIconExperimentTooltip => '앱 아이콘 실험';
+
+  @override
+  String get appIconExperimentTitle => '앱 아이콘 실험';
+
+  @override
+  String get appIconExperimentBody =>
+      '홈 화면 아이콘을 Hub / Portal 중 골라 비교해 보세요. 언제든 바꿀 수 있습니다.';
+
+  @override
+  String get appIconHub => 'Hub';
+
+  @override
+  String get appIconPortal => 'Portal';
+
+  @override
+  String get appIconSelected => '선택됨';
+
+  @override
+  String get appIconChanged => '앱 아이콘을 바꿨습니다.';
+
+  @override
+  String get appIconChangedAndroid => '앱을 나간 뒤에 아이콘이 반영됩니다.';
+
+  @override
+  String get appIconUnsupported => '이 기기에서는 아이콘 교체를 지원하지 않습니다.';
+
+  @override
+  String appIconChangeFailed(String error) {
+    return '아이콘을 바꾸지 못했습니다: $error';
+  }
+
+  @override
   String get adConfirmTitle => 'AI 요약';
 
   @override
@@ -362,9 +457,6 @@ class AppLocalizationsKo extends AppLocalizations {
   String get exchangeCoinbase => 'Coinbase';
 
   @override
-  String get exchangeHtx => 'HTX';
-
-  @override
   String get bannerGateTitle => '상장·캠페인';
 
   @override
@@ -387,10 +479,4 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get bannerCoinbaseBody => '상태 업데이트와 예정된 점검 안내';
-
-  @override
-  String get bannerHtxTitle => 'HTX 액티비티';
-
-  @override
-  String get bannerHtxBody => '최신 캠페인과 리워드를 모았습니다';
 }

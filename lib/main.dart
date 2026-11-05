@@ -5,11 +5,18 @@ import 'l10n/app_localizations.dart';
 import 'screens/events_screen.dart';
 import 'services/ad_gate.dart';
 import 'services/exchange_events_service.dart';
+import 'services/exchange_referral.dart';
+import 'services/push_notification_service.dart';
 import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await AdGate.initialize(ExchangeEventsService.productionApiBaseUrl);
+  final apiBase = ExchangeEventsService.productionApiBaseUrl;
+  await Future.wait([
+    AdGate.initialize(apiBase),
+    ExchangeReferral.load(apiBaseUrl: apiBase),
+    PushNotificationService.instance.initialize(),
+  ]);
   runApp(const ExoraApp());
 }
 
@@ -53,6 +60,15 @@ class ExoraApp extends StatelessWidget {
     return MaterialApp(
       onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
       debugShowCheckedModeBanner: false,
+      // Keep designed type sizes; ignore OS accessibility text scaling.
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(
+            textScaler: TextScaler.noScaling,
+          ),
+          child: child ?? const SizedBox.shrink(),
+        );
+      },
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

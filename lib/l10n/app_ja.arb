@@ -10,6 +10,25 @@
   "searchCloseTooltip": "検索を閉じる",
   "notificationsTooltip": "通知",
   "notificationsComingSoon": "通知機能は近日公開予定です。",
+  "pushSettingsTitle": "プッシュ通知",
+  "pushSettingsIntro": "アプリを開かなくても役立つ取引所の機会を受け取れます。必要な項目だけオンにしてください。",
+  "pushMasterTitle": "機会アラート",
+  "pushMasterSubtitle": "プッシュ通知のマスタースイッチ",
+  "pushPermissionDenied": "通知の許可が拒否されました。",
+  "pushCategoriesSection": "受け取る内容",
+  "pushExchangesSection": "取引所",
+  "pushExchangesHint": "カテゴリと取引所の両方がオンのときだけ通知されます。",
+  "pushOtherExchangesNote": "Gate・MEXC などはまだサーバーポーリング対象外です。",
+  "pushCatContest": "取引コンテスト",
+  "pushCatContestDesc": "出来高・PNL大会、報酬キャンペーン",
+  "pushCatEarn": "Earn · APRブースト",
+  "pushCatEarnDesc": "Flexible/Fixed プロモ、Launchpool系",
+  "pushCatListing": "新規上場 · Launchpad",
+  "pushCatListingDesc": "上場・ローンチ告知",
+  "pushCatDeposit": "入金・登録ボーナス",
+  "pushCatDepositDesc": "ウェルカム・入金ボーナス（多めになりがち）",
+  "pushCatOther": "その他キャンペーン",
+  "pushCatOtherDesc": "手数料割引、Convertチャレンジなど",
   "refreshTooltip": "更新",
   "loadingEvents": "イベントを読み込み中…",
   "loadingEarn": "Flexible USDT Earn を読み込み中…",
@@ -74,6 +93,24 @@
   "aiSectionCautions": "注意",
   "aiFailed": "AI分析に失敗しました: {error}",
   "viewOriginal": "原文を見る",
+  "bannerSignUp": "登録する",
+  "appIconExperimentTooltip": "アプリアイコン実験",
+  "appIconExperimentTitle": "アプリアイコン実験",
+  "appIconExperimentBody": "ホーム画面アイコンを Hub / Portal で試せます。いつでも切り替え可能です。",
+  "appIconHub": "Hub",
+  "appIconPortal": "Portal",
+  "appIconSelected": "選択中",
+  "appIconChanged": "アプリアイコンを更新しました。",
+  "appIconChangedAndroid": "アプリを終了するとアイコンが反映されます。",
+  "appIconUnsupported": "この端末ではアイコン切替に対応していません。",
+  "appIconChangeFailed": "アイコンを変更できませんでした: {error}",
+  "@appIconChangeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "adConfirmTitle": "AI要約",
   "adConfirmMessage": "広告を視聴するとAI要約を確認できます。続けますか？",
   "cancel": "キャンセル",
@@ -110,7 +147,6 @@
   "exchangeMexc": "MEXC",
   "exchangeKucoin": "KuCoin",
   "exchangeCoinbase": "Coinbase",
-  "exchangeHtx": "HTX",
   "bannerGateTitle": "上場・キャンペーン",
   "bannerGateBody": "Gateのプロモと取引大会をまとめて",
   "bannerMexcTitle": "イベントレーダー",
@@ -118,7 +154,5 @@
   "bannerKucoinTitle": "KuCoinニュース",
   "bannerKucoinBody": "上場、Earnブースト、公式お知らせ",
   "bannerCoinbaseTitle": "取引所のお知らせ",
-  "bannerCoinbaseBody": "ステータス更新と予定メンテナンス",
-  "bannerHtxTitle": "HTXアクティビティ",
-  "bannerHtxBody": "最新キャンペーンとリワード"
+  "bannerCoinbaseBody": "ステータス更新と予定メンテナンス"
 }

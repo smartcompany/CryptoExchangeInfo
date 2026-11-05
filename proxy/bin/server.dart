@@ -82,6 +82,42 @@ Future<Response> _settingsHandler(Request request) async {
     },
     'down_load_url': Platform.environment['DOWNLOAD_URL'] ??
         'https://cryptoexchangeinfoserver.vercel.app/applink',
+    'referrals': {
+      'binance': Platform.environment['REF_BINANCE'] ?? 'GRO_28502_DHEX0',
+      'bybit': Platform.environment['REF_BYBIT'] ?? '4LMVJ',
+      'okx': Platform.environment['REF_OKX'] ?? 'LYPMI7KH',
+      'gate': Platform.environment['REF_GATE'] ?? 'VVUXULXECQ',
+      'mexc': Platform.environment['REF_MEXC'] ?? '4E6ZD',
+      'bitget': Platform.environment['REF_BITGET'] ?? 'ZNUN2HX5',
+      'kucoin': Platform.environment['REF_KUCOIN'] ?? 'L2ZXN45F',
+      'coinbase': Platform.environment['REF_COINBASE'] ?? 'SWD7NTZ',
+    },
+    'referral_links': {
+      'binance':
+          Platform.environment['REF_LINK_BINANCE'] ??
+          'https://www.binance.com/join?ref=GRO_28502_DHEX0',
+      'bybit':
+          Platform.environment['REF_LINK_BYBIT'] ??
+          'https://www.bybit.com/invite?ref=4LMVJ',
+      'okx':
+          Platform.environment['REF_LINK_OKX'] ??
+          'https://www.okx.com/join/LYPMI7KH',
+      'gate':
+          Platform.environment['REF_LINK_GATE'] ??
+          'https://www.gate.com/share/VVUXULXECQ',
+      'mexc':
+          Platform.environment['REF_LINK_MEXC'] ??
+          'https://s.mexc.com/referral/A3WQZcmWqu',
+      'bitget':
+          Platform.environment['REF_LINK_BITGET'] ??
+          'https://share.bitget.com/u/S6N2QMQN',
+      'kucoin':
+          Platform.environment['REF_LINK_KUCOIN'] ??
+          'https://www.kucoin.com/r/rf/L2ZXN45F',
+      'coinbase':
+          Platform.environment['REF_LINK_COINBASE'] ??
+          'https://advanced.coinbase.com/join/SWD7NTZ?src=referral-link',
+    },
   };
   return Response.ok(jsonEncode(settings), headers: _jsonHeaders);
 }
@@ -361,7 +397,7 @@ Future<Response> _binanceEventsHandler(Request request) async {
         tags: const ['Latest Activities'],
         url: code.isEmpty
             ? 'https://www.binance.com/en/support/announcement'
-            : 'https://www.binance.com/en/support/announcement/$code',
+            : 'https://www.binance.com/en/support/announcement/detail/$code',
         dateTimestamp: releaseDate,
         startDateTimestamp: null,
         endDateTimestamp: null,

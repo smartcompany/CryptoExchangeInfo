@@ -10,6 +10,25 @@
   "searchCloseTooltip": "검색 닫기",
   "notificationsTooltip": "알림",
   "notificationsComingSoon": "알림 기능은 곧 제공됩니다.",
+  "pushSettingsTitle": "푸시 알림",
+  "pushSettingsIntro": "앱을 켜지 않아도 유용한 거래소 기회를 받아보세요. 관심 있는 항목만 켜 두세요.",
+  "pushMasterTitle": "새 기회 알림",
+  "pushMasterSubtitle": "푸시 알림 전체 켜기/끄기",
+  "pushPermissionDenied": "알림 권한이 거부되었습니다.",
+  "pushCategoriesSection": "어떤 소식을 받을까요",
+  "pushExchangesSection": "어느 거래소",
+  "pushExchangesHint": "카테고리와 거래소를 모두 켠 조합만 알림이 갑니다.",
+  "pushOtherExchangesNote": "Gate, MEXC 등 다른 거래소는 아직 서버 폴링 대상이 아닙니다.",
+  "pushCatContest": "거래 대회 / 컨테스트",
+  "pushCatContestDesc": "거래량·PNL 대회, 보상 캠페인",
+  "pushCatEarn": "Earn · APR 부스트",
+  "pushCatEarnDesc": "Flexible/Fixed 프로모, Launchpool 성격 이벤트",
+  "pushCatListing": "신규 상장 · Launchpad",
+  "pushCatListingDesc": "상장·런치 공지",
+  "pushCatDeposit": "입금·가입 보너스",
+  "pushCatDepositDesc": "웰컴·입금 보너스 (알림이 많을 수 있음)",
+  "pushCatOther": "기타 캠페인",
+  "pushCatOtherDesc": "수수료 할인, Convert 챌린지 등",
   "refreshTooltip": "새로고침",
   "loadingEvents": "이벤트 불러오는 중…",
   "loadingEarn": "Flexible USDT Earn 불러오는 중…",
@@ -74,6 +93,24 @@
   "aiSectionCautions": "주의",
   "aiFailed": "AI 분석 실패: {error}",
   "viewOriginal": "원문 보기",
+  "bannerSignUp": "가입하기",
+  "appIconExperimentTooltip": "앱 아이콘 실험",
+  "appIconExperimentTitle": "앱 아이콘 실험",
+  "appIconExperimentBody": "홈 화면 아이콘을 Hub / Portal 중 골라 비교해 보세요. 언제든 바꿀 수 있습니다.",
+  "appIconHub": "Hub",
+  "appIconPortal": "Portal",
+  "appIconSelected": "선택됨",
+  "appIconChanged": "앱 아이콘을 바꿨습니다.",
+  "appIconChangedAndroid": "앱을 나간 뒤에 아이콘이 반영됩니다.",
+  "appIconUnsupported": "이 기기에서는 아이콘 교체를 지원하지 않습니다.",
+  "appIconChangeFailed": "아이콘을 바꾸지 못했습니다: {error}",
+  "@appIconChangeFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
   "adConfirmTitle": "AI 요약",
   "adConfirmMessage": "광고를 시청한 뒤 AI 요약을 확인할 수 있습니다. 계속할까요?",
   "cancel": "취소",
@@ -110,7 +147,6 @@
   "exchangeMexc": "MEXC",
   "exchangeKucoin": "KuCoin",
   "exchangeCoinbase": "Coinbase",
-  "exchangeHtx": "HTX",
   "bannerGateTitle": "상장·캠페인",
   "bannerGateBody": "Gate 프로모션과 거래 대회를 한곳에서",
   "bannerMexcTitle": "이벤트 레이더",
@@ -118,7 +154,5 @@
   "bannerKucoinTitle": "KuCoin 소식",
   "bannerKucoinBody": "상장, Earn 부스트, 플랫폼 공지",
   "bannerCoinbaseTitle": "거래소 공지",
-  "bannerCoinbaseBody": "상태 업데이트와 예정된 점검 안내",
-  "bannerHtxTitle": "HTX 액티비티",
-  "bannerHtxBody": "최신 캠페인과 리워드를 모았습니다"
+  "bannerCoinbaseBody": "상태 업데이트와 예정된 점검 안내"
 }

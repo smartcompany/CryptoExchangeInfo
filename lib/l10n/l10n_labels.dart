@@ -12,7 +12,6 @@ extension L10nLabels on AppLocalizations {
         Exchange.bitget => exchangeBitget,
         Exchange.kucoin => exchangeKucoin,
         Exchange.coinbase => exchangeCoinbase,
-        Exchange.htx => exchangeHtx,
         Exchange.upbit => exchangeUpbit,
         Exchange.bithumb => exchangeBithumb,
       };
