@@ -24,6 +24,8 @@ class PushNotificationService {
   PushPreferences prefs = PushPreferences();
   final Set<String> _subscribed = {};
   StreamSubscription<String>? _tokenRefreshSub;
+  Timer? _tokenRetryTimer;
+  var _tokenRetryAttempt = 0;
 
   bool get masterEnabled => prefs.masterEnabled;
 
@@ -65,6 +67,30 @@ class PushNotificationService {
     // Always upsert user row on launch (token only when master is on).
     unawaited(registerPushToken());
     _ready = true;
+  }
+
+  void _scheduleTokenRetryIfNeeded({required String? token}) {
+    _tokenRetryTimer?.cancel();
+    if (!prefs.masterEnabled) {
+      _tokenRetryAttempt = 0;
+      return;
+    }
+    if (token != null && token.isNotEmpty) {
+      _tokenRetryAttempt = 0;
+      return;
+    }
+    // Simulator / cold APNs: keep retrying a few times; real devices usually
+    // succeed via onTokenRefresh or within these attempts.
+    if (_tokenRetryAttempt >= 8) return;
+    _tokenRetryAttempt += 1;
+    final delay = Duration(seconds: 2 * _tokenRetryAttempt);
+    debugPrint(
+      '[push] FCM token missing — retry #$_tokenRetryAttempt in ${delay.inSeconds}s'
+      '${defaultTargetPlatform == TargetPlatform.iOS ? ' (simulator often has no APNs)' : ''}',
+    );
+    _tokenRetryTimer = Timer(delay, () {
+      unawaited(registerPushToken());
+    });
   }
 
   Future<bool> setMasterEnabled(bool value) async {
@@ -144,6 +170,7 @@ class PushNotificationService {
         '[push] register failed (check Railway SUPABASE_* env + API logs)',
       );
     }
+    _scheduleTokenRetryIfNeeded(token: token);
   }
 
   /// iOS needs an APNs token before FCM `getToken` succeeds.
@@ -152,12 +179,16 @@ class PushNotificationService {
     try {
       if (defaultTargetPlatform == TargetPlatform.iOS) {
         String? apns = await messaging.getAPNSToken();
-        for (var i = 0; i < 10 && (apns == null || apns.isEmpty); i++) {
-          await Future<void>.delayed(const Duration(milliseconds: 300));
+        for (var i = 0; i < 15 && (apns == null || apns.isEmpty); i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 400));
           apns = await messaging.getAPNSToken();
         }
         if (apns == null || apns.isEmpty) {
-          debugPrint('[push] APNs token not ready yet');
+          debugPrint(
+            '[push] APNs token not ready yet '
+            '(common on iOS Simulator — use a real device for FCM token)',
+          );
+          return null;
         }
       }
       return await messaging.getToken();
