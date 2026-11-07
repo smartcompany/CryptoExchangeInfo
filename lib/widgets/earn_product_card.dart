@@ -47,7 +47,7 @@ class EarnProductCard extends StatelessWidget {
                   ),
                   child: Text(
                     product.available
-                        ? l10n.earnHeroTitle
+                        ? l10n.earnFlexibleBadge
                         : l10n.earnUnsupported,
                     style: theme.textTheme.labelLarge?.copyWith(
                       color: product.available
@@ -88,7 +88,9 @@ class EarnProductCard extends StatelessWidget {
               ],
               if (product.minAmount != null) ...[
                 const SizedBox(height: 6),
-                Text(l10n.earnMinAmount(product.minAmount!)),
+                Text(
+                  l10n.earnMinAmount(product.minAmount!, product.coin),
+                ),
               ],
               if (product.tiers.isNotEmpty) ...[
                 const SizedBox(height: 12),
@@ -104,7 +106,9 @@ class EarnProductCard extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 4),
                     child: Row(
                       children: [
-                        Expanded(child: Text(tier.rangeLabel)),
+                        Expanded(
+                          child: Text(tier.rangeLabel(product.coin)),
+                        ),
                         Text(
                           tier.aprDisplay ?? '-',
                           style: const TextStyle(fontWeight: FontWeight.w700),

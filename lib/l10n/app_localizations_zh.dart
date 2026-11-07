@@ -15,10 +15,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sectionEvents => '交易所活动';
 
   @override
-  String get sectionEarning => 'Earning（灵活 USDT）';
+  String get sectionEarning => 'Stable Coin Earn';
 
   @override
-  String get sectionEarningShort => '灵活 USDT';
+  String get sectionEarningShort => 'Stable Coin Earn';
 
   @override
   String get menuSelect => '选择菜单';
@@ -33,6 +33,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get searchCloseTooltip => '关闭搜索';
 
   @override
+  String get shareTooltip => '分享';
+
+  @override
+  String shareMessage(String url) {
+    return '来看看 Exora — 加密货币交易所中心\n$url';
+  }
+
+  @override
   String get notificationsTooltip => '通知';
 
   @override
@@ -45,7 +53,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushSettingsIntro => '即使不打开应用，也能收到有用的交易所机会。只打开你关心的项目。';
 
   @override
-  String get pushMasterTitle => '机会提醒';
+  String get pushMasterTitle => '推送通知总开关';
 
   @override
   String get pushMasterSubtitle => '推送总开关';
@@ -96,13 +104,55 @@ class AppLocalizationsZh extends AppLocalizations {
   String get pushCatOtherDesc => '手续费优惠、闪兑挑战等';
 
   @override
+  String get pushDigestTitle => '新机会提醒';
+
+  @override
+  String pushDigestBody(String exchanges, String categories) {
+    return '$exchanges有新的$categories。';
+  }
+
+  @override
+  String pushDigestListTwo(String a, String b) {
+    return '$a、$b';
+  }
+
+  @override
+  String pushDigestListTwoMore(String a, String b) {
+    return '$a、$b等';
+  }
+
+  @override
+  String get pushDigestCatContest => '大赛';
+
+  @override
+  String get pushDigestCatEarn => 'Earn';
+
+  @override
+  String get pushDigestCatListing => '上币';
+
+  @override
+  String get pushDigestCatDeposit => '入金奖励';
+
+  @override
+  String get pushDigestCatOther => '活动';
+
+  @override
+  String get pushDigestExBinance => '币安';
+
+  @override
+  String get pushDigestExBybit => 'Bybit';
+
+  @override
+  String get pushDigestExOkx => 'OKX';
+
+  @override
   String get refreshTooltip => '刷新';
 
   @override
   String get loadingEvents => '正在加载活动…';
 
   @override
-  String get loadingEarn => '正在加载灵活 USDT Earn…';
+  String get loadingEarn => '正在加载 Stable Coin Earn…';
 
   @override
   String get noMatchingItems => '没有符合条件的项目。';
@@ -347,14 +397,17 @@ class AppLocalizationsZh extends AppLocalizations {
   String get adConfirmContinue => '观看广告并继续';
 
   @override
-  String get earnHeroTitle => 'Flexible USDT';
+  String get earnHeroTitle => 'Stable Coin Earn';
 
   @override
-  String get earnHeroBody => '各交易所灵活 USDT 理财利率。实际年化可能因档位与时间而异。';
+  String get earnHeroBody => '各交易所灵活稳定币理财利率。请在下方选择币种。实际年化可能因档位与时间而异。';
 
   @override
-  String earnMinAmount(String amount) {
-    return '最低 $amount USDT';
+  String get earnFlexibleBadge => 'Flexible';
+
+  @override
+  String earnMinAmount(String amount, String coin) {
+    return '最低 $amount $coin';
   }
 
   @override
@@ -369,10 +422,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get earnUnavailableBitget => 'Bitget Savings 查询需要 API 密钥。';
 
   @override
-  String get earnUnavailableUpbit => 'Upbit 无公开灵活 USDT Earn API。';
+  String get earnUnavailableUpbit => 'Upbit 无公开 Flexible Earn API。';
 
   @override
-  String get earnUnavailableBithumb => 'Bithumb 无公开灵活 USDT Earn API。';
+  String get earnUnavailableBithumb => 'Bithumb 无公开 Flexible Earn API。';
 
   @override
   String get earnTierNote => '适用年化可能因金额档位而异。';

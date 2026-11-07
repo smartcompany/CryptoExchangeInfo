@@ -1,9 +1,11 @@
 import 'dart:async';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import '../models/exchange_event.dart';
 import '../models/opportunity.dart';
+import '../services/app_share.dart';
 import '../services/exchange_event_fetchers.dart';
 import '../services/exchange_events_service.dart';
 import '../l10n/app_localizations.dart';
@@ -12,6 +14,7 @@ import '../services/opportunity_repository.dart';
 import '../theme/app_colors.dart';
 import '../widgets/event_card.dart';
 import '../widgets/exchange_banner.dart';
+import '../widgets/liquid_glass.dart';
 import '../widgets/opportunity_card.dart';
 import 'earning_screen.dart';
 import 'push_settings_screen.dart';
@@ -99,7 +102,7 @@ class _EventsScreenState extends State<EventsScreen> {
     final selected = await showModalBottomSheet<HomeSection>(
       context: context,
       showDragHandle: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: AppColors.glassFillStrong,
       builder: (context) {
         return SafeArea(
           child: Column(
@@ -156,12 +159,14 @@ class _EventsScreenState extends State<EventsScreen> {
         _section == HomeSection.events || _section == HomeSection.contests;
 
     return Scaffold(
-      backgroundColor: AppColors.page,
+      backgroundColor: AppColors.pageWashTop,
+      extendBody: true,
       appBar: AppBar(
-        backgroundColor: AppColors.card,
+        backgroundColor: AppColors.pageWashTop,
         surfaceTintColor: Colors.transparent,
+        shadowColor: Colors.transparent,
         elevation: 0,
-        scrolledUnderElevation: 0.5,
+        scrolledUnderElevation: 0,
         titleSpacing: 12,
         title: _searchOpen && showSearch
             ? TextField(
@@ -210,9 +215,27 @@ class _EventsScreenState extends State<EventsScreen> {
         actions: [
           if (showSearch) ...[
             IconButton(
+              tooltip: l10n.shareTooltip,
+              iconSize: 28,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.padded,
+              ),
+              onPressed: () => AppShare.shareApp(l10n),
+              icon: const Icon(
+                Icons.ios_share_rounded,
+                color: AppColors.ink,
+              ),
+            ),
+            IconButton(
               tooltip: _searchOpen
                   ? l10n.searchCloseTooltip
                   : l10n.searchTooltip,
+              iconSize: 28,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.padded,
+              ),
               onPressed: () {
                 setState(() {
                   _searchOpen = !_searchOpen;
@@ -229,6 +252,11 @@ class _EventsScreenState extends State<EventsScreen> {
             ),
             IconButton(
               tooltip: l10n.notificationsTooltip,
+              iconSize: 28,
+              style: IconButton.styleFrom(
+                minimumSize: const Size(48, 48),
+                tapTargetSize: MaterialTapTargetSize.padded,
+              ),
               onPressed: () {
                 Navigator.of(context).push(
                   MaterialPageRoute<void>(
@@ -246,44 +274,64 @@ class _EventsScreenState extends State<EventsScreen> {
       ),
       // Keep sections mounted so PageView / pane state survives section switches.
       // Rebuilding events via `switch` disposed the PageView and wiped tab content.
-      body: IndexedStack(
-        index: _section.index,
-        sizing: StackFit.expand,
-        children: [
-          Column(
-            children: [
-              _ExchangePillBar(
-                exchanges: _tabs,
-                selectedIndex: _exchangeIndex,
-                onSelected: _selectExchange,
-              ),
-              Expanded(
-                child: PageView.builder(
+      body: DecoratedBox(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [AppColors.pageWashTop, AppColors.pageWashBottom],
+          ),
+        ),
+        child: IndexedStack(
+          index: _section.index,
+          sizing: StackFit.expand,
+          children: [
+            Stack(
+              fit: StackFit.expand,
+              children: [
+                PageView.builder(
                   controller: _pageController,
+                  // When this IndexedStack child is offstage (e.g. Contests),
+                  // disable paging so gesture/scroll state doesn't get stuck.
+                  physics: _section == HomeSection.events
+                      ? null
+                      : const NeverScrollableScrollPhysics(),
                   itemCount: _tabs.length,
                   onPageChanged: (index) {
                     setState(() => _exchangeIndex = index);
                   },
                   itemBuilder: (context, index) {
+                    final eventsVisible = _section == HomeSection.events;
                     return _ExchangeEventsPane(
                       exchange: _tabs[index],
                       service: _service,
                       opportunities: _opportunities,
                       searchQuery: _searchQuery,
-                      active: index == _exchangeIndex,
+                      active: eventsVisible && index == _exchangeIndex,
+                      sectionVisible: eventsVisible,
                     );
                   },
                 ),
-              ),
-            ],
-          ),
-          _TradingContestsPane(
-            opportunities: _opportunities,
-            searchQuery: _searchQuery,
-            active: _section == HomeSection.contests,
-          ),
-          const EarningScreen(),
-        ],
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _ExchangePillBar(
+                    exchanges: _tabs,
+                    selectedIndex: _exchangeIndex,
+                    onSelected: _selectExchange,
+                  ),
+                ),
+              ],
+            ),
+            _TradingContestsPane(
+              opportunities: _opportunities,
+              searchQuery: _searchQuery,
+              active: _section == HomeSection.contests,
+            ),
+            EarningScreen(active: _section == HomeSection.earning),
+          ],
+        ),
       ),
     );
   }
@@ -302,29 +350,89 @@ class _ExchangePillBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: AppColors.card,
-      padding: const EdgeInsets.fromLTRB(
-        AppColors.contentInset,
-        4,
-        AppColors.contentInset,
-        12,
-      ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (var i = 0; i < exchanges.length; i++) ...[
-              if (i > 0) const SizedBox(width: 8),
-              _ExchangePill(
-                label: AppLocalizations.of(context).exchangeName(exchanges[i]),
-                selected: i == selectedIndex,
-                onTap: () => onSelected(i),
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
+    // Capsule sits above home indicator; frosted dock fills safe area too.
+    const capsuleBottomGap = 10.0;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Soft fade so the dock doesn't hard-cut into the list.
+        IgnorePointer(
+          child: Container(
+            height: 28,
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  AppColors.pageWashBottom.withValues(alpha: 0),
+                  AppColors.glassFillLight.withValues(alpha: 0.35),
+                ],
               ),
-            ],
-          ],
+            ),
+          ),
         ),
-      ),
+        ClipRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 36, sigmaY: 36),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.white.withValues(alpha: 0.22),
+                    AppColors.glassFillLight,
+                    AppColors.glassFillLight.withValues(alpha: 0.55),
+                  ],
+                  stops: const [0, 0.4, 1],
+                ),
+                border: Border(
+                  top: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.40),
+                  ),
+                ),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  AppColors.contentInset,
+                  10,
+                  AppColors.contentInset,
+                  bottomInset + capsuleBottomGap,
+                ),
+                child: LiquidGlass(
+                  borderRadius: 28,
+                  blur: 20,
+                  shadow: false,
+                  fill: AppColors.glassFillLight,
+                  stroke: Colors.white.withValues(alpha: 0.50),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 10,
+                  ),
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < exchanges.length; i++) ...[
+                          if (i > 0) const SizedBox(width: 8),
+                          _ExchangePill(
+                            label: AppLocalizations.of(
+                              context,
+                            ).exchangeName(exchanges[i]),
+                            selected: i == selectedIndex,
+                            onTap: () => onSelected(i),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -343,19 +451,26 @@ class _ExchangePill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.brand : AppColors.chipIdle,
-      borderRadius: BorderRadius.circular(999),
+      color: selected ? AppColors.glassChipSelected : AppColors.glassChip,
+      elevation: 0,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: selected
+              ? Colors.white.withValues(alpha: 0.18)
+              : Colors.white.withValues(alpha: 0.35),
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
+        customBorder: const StadiumBorder(),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 15,
               fontWeight: FontWeight.w700,
-              color: selected ? Colors.white : AppColors.muted,
+              color: selected ? Colors.white : AppColors.ink,
             ),
           ),
         ),
@@ -512,7 +627,8 @@ class _TradingContestsPaneState extends State<_TradingContestsPane>
       color: AppColors.brand,
       onRefresh: () => _startLoad(forceRefresh: true),
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 24),
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.only(top: 8, bottom: 24),
         children: [
           const _ContestsHubBanner(),
           if (_items.isEmpty)
@@ -626,6 +742,7 @@ class _ExchangeEventsPane extends StatefulWidget {
     required this.opportunities,
     required this.searchQuery,
     required this.active,
+    required this.sectionVisible,
   });
 
   final Exchange exchange;
@@ -633,6 +750,9 @@ class _ExchangeEventsPane extends StatefulWidget {
   final OpportunityRepository opportunities;
   final String searchQuery;
   final bool active;
+
+  /// True while HomeSection.events is showing (IndexedStack visible).
+  final bool sectionVisible;
 
   @override
   State<_ExchangeEventsPane> createState() => _ExchangeEventsPaneState();
@@ -648,6 +768,8 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
   bool _loading = false;
   bool _loadingMore = false;
   bool _started = false;
+  /// Recreate RefreshIndicator after IndexedStack offstage → onstage.
+  var _refreshEpoch = 0;
   late final ScrollController _scrollController;
   /// Footer-only updates (avoid rebuilding every card while loading more).
   late final ValueNotifier<bool> _footerLoadingMore;
@@ -670,6 +792,11 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
     super.didUpdateWidget(oldWidget);
     if (widget.active && !oldWidget.active) {
       _startLoad();
+    }
+    // IndexedStack leaves pages mounted but offstage; RefreshIndicator can
+    // stop receiving overscroll until its State is recreated.
+    if (widget.sectionVisible && !oldWidget.sectionVisible) {
+      setState(() => _refreshEpoch++);
     }
   }
 
@@ -889,10 +1016,9 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
   Widget build(BuildContext context) {
     super.build(context);
     final l10n = AppLocalizations.of(context);
-    return Scaffold(
-      backgroundColor: AppColors.page,
-      body: _buildBody(l10n),
-    );
+    // No nested Scaffold — parent EventsScreen already provides one, and an
+    // extra Scaffold breaks pull-to-refresh after IndexedStack switches.
+    return _buildBody(l10n);
   }
 
   Widget _buildBody(AppLocalizations l10n) {
@@ -938,13 +1064,18 @@ class _ExchangeEventsPaneState extends State<_ExchangeEventsPane>
               (_typeFilter == null ? notices.length : 0);
 
     return RefreshIndicator(
+      key: ValueKey<int>(_refreshEpoch),
       color: AppColors.brand,
       onRefresh: () => _startLoad(forceRefresh: true),
       child: Scrollbar(
         controller: _scrollController,
         child: ListView(
           controller: _scrollController,
-          padding: const EdgeInsets.only(bottom: 24),
+          physics: const AlwaysScrollableScrollPhysics(),
+          padding: const EdgeInsets.only(
+            top: 4,
+            bottom: AppColors.exchangeBarClearance + 24,
+          ),
           children: [
           ExchangeBanner(exchange: widget.exchange),
           if (hasFeed) ...[
@@ -1093,19 +1224,17 @@ class _GuideChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? AppColors.brand : AppColors.card,
-      borderRadius: BorderRadius.circular(999),
+      color: selected ? AppColors.glassChipSelected : AppColors.glassChip,
+      shape: StadiumBorder(
+        side: BorderSide(
+          color: Colors.white.withValues(alpha: selected ? 0.18 : 0.40),
+        ),
+      ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(999),
-        child: Container(
+        customBorder: const StadiumBorder(),
+        child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(
-              color: selected ? AppColors.brand : AppColors.line,
-            ),
-          ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -1118,7 +1247,7 @@ class _GuideChip extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
-                  color: selected ? Colors.white : AppColors.muted,
+                  color: selected ? Colors.white : AppColors.ink,
                 ),
               ),
             ],

@@ -54,7 +54,7 @@ class ExchangeBanner extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         AppColors.contentInset,
-        12,
+        4,
         AppColors.contentInset,
         4,
       ),

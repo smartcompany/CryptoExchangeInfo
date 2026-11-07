@@ -11,13 +11,15 @@ import 'theme/app_colors.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Paint the first Flutter frame immediately so the native LaunchScreen is
+  // not replaced by a blank FlutterView while ads/push/referral still load.
+  runApp(const ExoraApp());
   final apiBase = ExchangeEventsService.productionApiBaseUrl;
   await Future.wait([
     AdGate.initialize(apiBase),
     ExchangeReferral.load(apiBaseUrl: apiBase),
     PushNotificationService.instance.initialize(),
   ]);
-  runApp(const ExoraApp());
 }
 
 class ExoraApp extends StatelessWidget {
@@ -83,10 +85,12 @@ class ExoraApp extends StatelessWidget {
         textTheme: textTheme,
         appBarTheme: const AppBarTheme(
           centerTitle: false,
-          backgroundColor: AppColors.card,
+          backgroundColor: AppColors.pageWashTop,
           foregroundColor: AppColors.ink,
+          surfaceTintColor: Colors.transparent,
+          shadowColor: Colors.transparent,
           elevation: 0,
-          scrolledUnderElevation: 0.5,
+          scrolledUnderElevation: 0,
           titleTextStyle: TextStyle(
             color: AppColors.ink,
             fontSize: 20,
@@ -94,13 +98,13 @@ class ExoraApp extends StatelessWidget {
           ),
         ),
         chipTheme: ChipThemeData(
-          selectedColor: AppColors.brand,
-          backgroundColor: AppColors.chipIdle,
+          selectedColor: AppColors.glassChipSelected,
+          backgroundColor: AppColors.glassChip,
           disabledColor: AppColors.chipIdle,
-          side: const BorderSide(color: AppColors.line),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.35)),
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
-            color: AppColors.muted,
+            color: AppColors.ink,
           ),
           secondaryLabelStyle: const TextStyle(
             fontWeight: FontWeight.w700,
@@ -112,10 +116,17 @@ class ExoraApp extends StatelessWidget {
         ),
         cardTheme: CardThemeData(
           elevation: 0,
-          color: AppColors.card,
+          color: AppColors.glassFill,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(18),
-            side: const BorderSide(color: AppColors.line),
+            borderRadius: BorderRadius.circular(20),
+            side: const BorderSide(color: AppColors.glassStroke),
+          ),
+        ),
+        bottomSheetTheme: const BottomSheetThemeData(
+          backgroundColor: AppColors.glassFillStrong,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
         ),
         floatingActionButtonTheme: const FloatingActionButtonThemeData(

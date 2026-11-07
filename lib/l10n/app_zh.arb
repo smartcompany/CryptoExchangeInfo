@@ -2,17 +2,24 @@
   "@@locale": "zh",
   "appTitle": "Exora",
   "sectionEvents": "交易所活动",
-  "sectionEarning": "Earning（灵活 USDT）",
-  "sectionEarningShort": "灵活 USDT",
+  "sectionEarning": "Stable Coin Earn",
+  "sectionEarningShort": "Stable Coin Earn",
   "menuSelect": "选择菜单",
   "searchEventsHint": "搜索活动",
   "searchTooltip": "搜索",
   "searchCloseTooltip": "关闭搜索",
+  "shareTooltip": "分享",
+  "shareMessage": "来看看 Exora — 加密货币交易所中心\n{url}",
+  "@shareMessage": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
   "notificationsTooltip": "通知",
   "notificationsComingSoon": "通知功能即将推出。",
   "pushSettingsTitle": "推送通知",
   "pushSettingsIntro": "即使不打开应用，也能收到有用的交易所机会。只打开你关心的项目。",
-  "pushMasterTitle": "机会提醒",
+  "pushMasterTitle": "推送通知总开关",
   "pushMasterSubtitle": "推送总开关",
   "pushPermissionDenied": "通知权限被拒绝。",
   "pushCategoriesSection": "接收哪些消息",
@@ -29,9 +36,39 @@
   "pushCatDepositDesc": "欢迎礼与入金奖励（可能较多）",
   "pushCatOther": "其他活动",
   "pushCatOtherDesc": "手续费优惠、闪兑挑战等",
+  "pushDigestTitle": "新机会提醒",
+  "pushDigestBody": "{exchanges}有新的{categories}。",
+  "@pushDigestBody": {
+    "placeholders": {
+      "exchanges": { "type": "String" },
+      "categories": { "type": "String" }
+    }
+  },
+  "pushDigestListTwo": "{a}、{b}",
+  "@pushDigestListTwo": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestListTwoMore": "{a}、{b}等",
+  "@pushDigestListTwoMore": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestCatContest": "大赛",
+  "pushDigestCatEarn": "Earn",
+  "pushDigestCatListing": "上币",
+  "pushDigestCatDeposit": "入金奖励",
+  "pushDigestCatOther": "活动",
+  "pushDigestExBinance": "币安",
+  "pushDigestExBybit": "Bybit",
+  "pushDigestExOkx": "OKX",
   "refreshTooltip": "刷新",
   "loadingEvents": "正在加载活动…",
-  "loadingEarn": "正在加载灵活 USDT Earn…",
+  "loadingEarn": "正在加载 Stable Coin Earn…",
   "noMatchingItems": "没有符合条件的项目。",
   "noEvents": "暂无可显示的活动。",
   "noEarnProducts": "暂无可显示的 Earn 产品。",
@@ -115,14 +152,15 @@
   "adConfirmMessage": "观看广告后即可查看 AI 摘要。是否继续？",
   "cancel": "取消",
   "adConfirmContinue": "观看广告并继续",
-  "earnHeroTitle": "Flexible USDT",
-  "earnHeroBody": "各交易所灵活 USDT 理财利率。实际年化可能因档位与时间而异。",
-  "earnMinAmount": "最低 {amount} USDT",
+  "earnHeroTitle": "Stable Coin Earn",
+  "earnHeroBody": "各交易所灵活稳定币理财利率。请在下方选择币种。实际年化可能因档位与时间而异。",
+  "earnFlexibleBadge": "Flexible",
+  "earnMinAmount": "最低 {amount} {coin}",
   "earnMarketApr": "Market APR {value}",
   "earnOpenPage": "前往 Earn 页面",
   "earnUnavailableBitget": "Bitget Savings 查询需要 API 密钥。",
-  "earnUnavailableUpbit": "Upbit 无公开灵活 USDT Earn API。",
-  "earnUnavailableBithumb": "Bithumb 无公开灵活 USDT Earn API。",
+  "earnUnavailableUpbit": "Upbit 无公开 Flexible Earn API。",
+  "earnUnavailableBithumb": "Bithumb 无公开 Flexible Earn API。",
   "earnTierNote": "适用年化可能因金额档位而异。",
   "bannerBybitTitle": "交易活动",
   "bannerBybitBody": "一眼查看最新奖励与赛事",

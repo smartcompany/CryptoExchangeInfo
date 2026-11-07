@@ -31,6 +31,7 @@ class EventCard extends StatefulWidget {
 
 class _EventCardState extends State<EventCard> {
   static final _dateFormat = DateFormat('yyyy.MM.dd');
+  static final _dateTimeFormat = DateFormat('yyyy.MM.dd HH:mm');
 
   String? _imageUrl;
   var _imageFailed = false;
@@ -108,13 +109,28 @@ class _EventCardState extends State<EventCard> {
     // blocks look worse than a text-only card.
     final showThumb = _imageUrl != null && !_imageFailed;
 
-    return Card(
+    return Container(
       margin: const EdgeInsets.symmetric(
         horizontal: AppColors.contentInset,
         vertical: 8,
       ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: AppColors.glassFill,
+        border: Border.all(color: AppColors.glassStroke),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandDark.withValues(alpha: 0.06),
+            blurRadius: 18,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
       clipBehavior: Clip.antiAlias,
-      child: Column(
+      child: InkWell(
+        onTap: () => _showDetail(context),
+        borderRadius: BorderRadius.circular(20),
+        child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (showThumb)
@@ -233,6 +249,143 @@ class _EventCardState extends State<EventCard> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<void> _showDetail(BuildContext context) async {
+    final theme = Theme.of(context);
+    final l10n = AppLocalizations.of(context);
+    final period = _periodLabel(l10n);
+    final exchangeLabel = widget.exchange != null
+        ? l10n.exchangeName(widget.exchange!)
+        : (event.exchange.trim().isNotEmpty
+              ? event.exchange
+              : l10n.typeEvent);
+
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: AppColors.glassFillStrong,
+      builder: (sheetContext) {
+        return SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    _TagPill(
+                      label: exchangeLabel,
+                      foreground: AppColors.brand,
+                      background: AppColors.brandSoft,
+                    ),
+                    _TagPill(
+                      label: l10n.typeEvent,
+                      foreground: AppColors.muted,
+                      background: AppColors.chipIdle,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  event.displayTitle,
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                if (event.displayDescription.isNotEmpty) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    event.displayDescription,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: AppColors.muted,
+                      height: 1.45,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 16),
+                if (event.startAt != null)
+                  _DetailRow(
+                    label: l10n.detailStart,
+                    value: _dateTimeFormat.format(event.startAt!.toLocal()),
+                  ),
+                if (event.endAt != null)
+                  _DetailRow(
+                    label: l10n.detailEnd,
+                    value: _dateTimeFormat.format(event.endAt!.toLocal()),
+                  ),
+                if (event.startAt == null &&
+                    event.endAt == null &&
+                    event.publishedAt != null)
+                  _DetailRow(
+                    label: l10n.detailStart,
+                    value: _dateTimeFormat.format(
+                      event.publishedAt!.toLocal(),
+                    ),
+                  ),
+                if (period != null &&
+                    (event.startAt != null || event.endAt != null)) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    period,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.muted,
+                    ),
+                  ),
+                ],
+                if (event.displayTags.isNotEmpty) ...[
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      for (final tag in event.displayTags)
+                        _TagPill(
+                          label: l10n.eventTag(tag),
+                          foreground: AppColors.muted,
+                          background: AppColors.chipIdle,
+                        ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 18),
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: AiSummaryButton(
+                        busy: _analyzing,
+                        onPressed: _analyzing
+                            ? null
+                            : () async {
+                                Navigator.pop(sheetContext);
+                                await _runAi();
+                              },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 4,
+                      child: OfficialLinkButton(
+                        onPressed: () {
+                          Navigator.pop(sheetContext);
+                          _openExternal(context);
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -325,6 +478,42 @@ class _TagPill extends StatelessWidget {
           fontWeight: FontWeight.w700,
           color: foreground,
         ),
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(
+              label,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppColors.muted,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 16, height: 1.35),
+            ),
+          ),
+        ],
       ),
     );
   }

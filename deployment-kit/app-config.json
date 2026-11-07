@@ -24,6 +24,6 @@
   "notes": [
     "In-app / home screen name: Exora",
     "App Store listing name: Exora - Crypto Exchange Hub",
-    "API default: Cloudflare Workers; metadata privacy URL uses Vercel for stable static hosting."
+    "API: Vercel (cryptoexchangeinfoserver.vercel.app)."
   ]
 }

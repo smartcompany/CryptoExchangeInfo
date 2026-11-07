@@ -178,14 +178,11 @@ class _CexProbeDebugSheetState extends State<_CexProbeDebugSheet> {
 }
 
 String _egressSummary(Map<String, dynamic> payload) {
-  final railway = payload['railway'];
   final egress = payload['egress'];
+  final runtime = payload['runtime']?.toString();
   final parts = <String>[];
-  if (railway is Map) {
-    final region = railway['region']?.toString();
-    if (region != null && region.isNotEmpty) {
-      parts.add('Railway region=$region');
-    }
+  if (runtime != null && runtime.isNotEmpty) {
+    parts.add('runtime=$runtime');
   }
   if (egress is Map) {
     final loc = egress['loc']?.toString();
@@ -195,7 +192,7 @@ String _egressSummary(Map<String, dynamic> payload) {
     if (colo != null && colo.isNotEmpty) parts.add('colo=$colo');
     if (ip != null && ip.isNotEmpty) parts.add('ip=$ip');
   }
-  return parts.isEmpty ? 'egress: (unknown until redeploy)' : parts.join(' · ');
+  return parts.isEmpty ? 'egress: (unknown)' : parts.join(' · ');
 }
 
 class _ExchangeProbeTile extends StatelessWidget {

@@ -2,17 +2,24 @@
   "@@locale": "ko",
   "appTitle": "Exora",
   "sectionEvents": "거래소 이벤트",
-  "sectionEarning": "Earning (Flexible USDT)",
-  "sectionEarningShort": "Flexible USDT",
+  "sectionEarning": "Stable Coin Earn",
+  "sectionEarningShort": "Stable Coin Earn",
   "menuSelect": "메뉴 선택",
   "searchEventsHint": "이벤트 검색",
   "searchTooltip": "검색",
   "searchCloseTooltip": "검색 닫기",
+  "shareTooltip": "공유",
+  "shareMessage": "Exora — 암호화폐 거래소 허브를 확인해 보세요\n{url}",
+  "@shareMessage": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
   "notificationsTooltip": "알림",
   "notificationsComingSoon": "알림 기능은 곧 제공됩니다.",
   "pushSettingsTitle": "푸시 알림",
   "pushSettingsIntro": "앱을 켜지 않아도 유용한 거래소 기회를 받아보세요. 관심 있는 항목만 켜 두세요.",
-  "pushMasterTitle": "새 기회 알림",
+  "pushMasterTitle": "푸시 알림 전체 켜기/끄기",
   "pushMasterSubtitle": "푸시 알림 전체 켜기/끄기",
   "pushPermissionDenied": "알림 권한이 거부되었습니다.",
   "pushCategoriesSection": "어떤 소식을 받을까요",
@@ -29,9 +36,39 @@
   "pushCatDepositDesc": "웰컴·입금 보너스 (알림이 많을 수 있음)",
   "pushCatOther": "기타 캠페인",
   "pushCatOtherDesc": "수수료 할인, Convert 챌린지 등",
+  "pushDigestTitle": "새 기회 알림",
+  "pushDigestBody": "{exchanges}에 새로운 {categories} 소식이 있습니다.",
+  "@pushDigestBody": {
+    "placeholders": {
+      "exchanges": { "type": "String" },
+      "categories": { "type": "String" }
+    }
+  },
+  "pushDigestListTwo": "{a}, {b}",
+  "@pushDigestListTwo": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestListTwoMore": "{a}, {b} 등",
+  "@pushDigestListTwoMore": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestCatContest": "대회",
+  "pushDigestCatEarn": "Earn",
+  "pushDigestCatListing": "상장",
+  "pushDigestCatDeposit": "입금 보너스",
+  "pushDigestCatOther": "이벤트",
+  "pushDigestExBinance": "바이낸스",
+  "pushDigestExBybit": "Bybit",
+  "pushDigestExOkx": "OKX",
   "refreshTooltip": "새로고침",
   "loadingEvents": "이벤트 불러오는 중…",
-  "loadingEarn": "Flexible USDT Earn 불러오는 중…",
+  "loadingEarn": "Stable Coin Earn 불러오는 중…",
   "noMatchingItems": "조건에 맞는 항목이 없습니다.",
   "noEvents": "표시할 이벤트가 없습니다.",
   "noEarnProducts": "표시할 Earn 상품이 없습니다.",
@@ -115,14 +152,15 @@
   "adConfirmMessage": "광고를 시청한 뒤 AI 요약을 확인할 수 있습니다. 계속할까요?",
   "cancel": "취소",
   "adConfirmContinue": "광고 보고 계속",
-  "earnHeroTitle": "Flexible USDT",
-  "earnHeroBody": "거래소별 유연(Flexible) USDT 거치 금리입니다. 구간·시점에 따라 실효 금리가 달라질 수 있습니다.",
-  "earnMinAmount": "최소 {amount} USDT",
+  "earnHeroTitle": "Stable Coin Earn",
+  "earnHeroBody": "거래소별 유연(Flexible) 스테이블코인 거치 금리입니다. 아래에서 코인을 고르세요. 구간·시점에 따라 실효 금리가 달라질 수 있습니다.",
+  "earnFlexibleBadge": "Flexible",
+  "earnMinAmount": "최소 {amount} {coin}",
   "earnMarketApr": "Market APR {value}",
   "earnOpenPage": "Earn 페이지로 이동",
   "earnUnavailableBitget": "Bitget Savings 상품 조회는 API 키가 필요합니다.",
-  "earnUnavailableUpbit": "업비트는 공개 Flexible USDT Earn API가 없습니다.",
-  "earnUnavailableBithumb": "빗썸은 공개 Flexible USDT Earn API가 없습니다.",
+  "earnUnavailableUpbit": "업비트는 공개 Flexible Earn API가 없습니다.",
+  "earnUnavailableBithumb": "빗썸은 공개 Flexible Earn API가 없습니다.",
   "earnTierNote": "금액 구간에 따라 적용 APR이 달라질 수 있습니다.",
   "bannerBybitTitle": "트레이딩 캠페인",
   "bannerBybitBody": "최신 리워드와 대회를 한눈에",

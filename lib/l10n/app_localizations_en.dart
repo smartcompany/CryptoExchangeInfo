@@ -15,10 +15,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionEvents => 'Exchange events';
 
   @override
-  String get sectionEarning => 'Earning (Flexible USDT)';
+  String get sectionEarning => 'Stable Coin Earn';
 
   @override
-  String get sectionEarningShort => 'Flexible USDT';
+  String get sectionEarningShort => 'Stable Coin Earn';
 
   @override
   String get menuSelect => 'Choose a menu';
@@ -31,6 +31,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchCloseTooltip => 'Close search';
+
+  @override
+  String get shareTooltip => 'Share';
+
+  @override
+  String shareMessage(String url) {
+    return 'Check out Exora — crypto exchange hub\n$url';
+  }
 
   @override
   String get notificationsTooltip => 'Notifications';
@@ -46,7 +54,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Get notified about useful exchange opportunities without opening the app. Turn on only what you care about.';
 
   @override
-  String get pushMasterTitle => 'Opportunity alerts';
+  String get pushMasterTitle => 'Turn all push alerts on/off';
 
   @override
   String get pushMasterSubtitle => 'Master switch for push notifications';
@@ -102,13 +110,55 @@ class AppLocalizationsEn extends AppLocalizations {
       'Fee discounts, convert challenges, and the rest';
 
   @override
+  String get pushDigestTitle => 'New opportunities';
+
+  @override
+  String pushDigestBody(String exchanges, String categories) {
+    return 'New $categories on $exchanges.';
+  }
+
+  @override
+  String pushDigestListTwo(String a, String b) {
+    return '$a, $b';
+  }
+
+  @override
+  String pushDigestListTwoMore(String a, String b) {
+    return '$a, $b, and more';
+  }
+
+  @override
+  String get pushDigestCatContest => 'contests';
+
+  @override
+  String get pushDigestCatEarn => 'Earn';
+
+  @override
+  String get pushDigestCatListing => 'listings';
+
+  @override
+  String get pushDigestCatDeposit => 'deposit bonuses';
+
+  @override
+  String get pushDigestCatOther => 'campaigns';
+
+  @override
+  String get pushDigestExBinance => 'Binance';
+
+  @override
+  String get pushDigestExBybit => 'Bybit';
+
+  @override
+  String get pushDigestExOkx => 'OKX';
+
+  @override
   String get refreshTooltip => 'Refresh';
 
   @override
   String get loadingEvents => 'Loading events…';
 
   @override
-  String get loadingEarn => 'Loading Flexible USDT Earn…';
+  String get loadingEarn => 'Loading Stable Coin Earn…';
 
   @override
   String get noMatchingItems => 'No items match your filters.';
@@ -359,15 +409,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get adConfirmContinue => 'Watch ad & continue';
 
   @override
-  String get earnHeroTitle => 'Flexible USDT';
+  String get earnHeroTitle => 'Stable Coin Earn';
 
   @override
   String get earnHeroBody =>
-      'Flexible USDT rates by exchange. Effective APR can vary by tier and timing.';
+      'Flexible stablecoin rates by exchange. Pick a coin below. Effective APR can vary by tier and timing.';
 
   @override
-  String earnMinAmount(String amount) {
-    return 'Min $amount USDT';
+  String get earnFlexibleBadge => 'Flexible';
+
+  @override
+  String earnMinAmount(String amount, String coin) {
+    return 'Min $amount $coin';
   }
 
   @override
@@ -382,12 +435,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get earnUnavailableBitget => 'Bitget Savings requires an API key.';
 
   @override
-  String get earnUnavailableUpbit =>
-      'Upbit has no public Flexible USDT Earn API.';
+  String get earnUnavailableUpbit => 'Upbit has no public Flexible Earn API.';
 
   @override
   String get earnUnavailableBithumb =>
-      'Bithumb has no public Flexible USDT Earn API.';
+      'Bithumb has no public Flexible Earn API.';
 
   @override
   String get earnTierNote => 'Applied APR may vary by balance tier.';

@@ -7,7 +7,7 @@ import 'api_auth.dart';
 import 'exchange_events_service.dart';
 import 'push_user_store.dart';
 
-/// Registers / updates FCM token on Railway → Supabase `cryptoex_users`.
+/// Registers / updates FCM token via API → Supabase `cryptoex_users`.
 class PushRegisterService {
   PushRegisterService._();
   static final PushRegisterService instance = PushRegisterService._();

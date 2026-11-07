@@ -2,17 +2,24 @@
   "@@locale": "ja",
   "appTitle": "Exora",
   "sectionEvents": "取引所イベント",
-  "sectionEarning": "Earning（Flexible USDT）",
-  "sectionEarningShort": "Flexible USDT",
+  "sectionEarning": "Stable Coin Earn",
+  "sectionEarningShort": "Stable Coin Earn",
   "menuSelect": "メニューを選択",
   "searchEventsHint": "イベントを検索",
   "searchTooltip": "検索",
   "searchCloseTooltip": "検索を閉じる",
+  "shareTooltip": "共有",
+  "shareMessage": "Exora — 暗号資産取引所ハブをチェック\n{url}",
+  "@shareMessage": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
   "notificationsTooltip": "通知",
   "notificationsComingSoon": "通知機能は近日公開予定です。",
   "pushSettingsTitle": "プッシュ通知",
   "pushSettingsIntro": "アプリを開かなくても役立つ取引所の機会を受け取れます。必要な項目だけオンにしてください。",
-  "pushMasterTitle": "機会アラート",
+  "pushMasterTitle": "プッシュ通知のオン/オフ",
   "pushMasterSubtitle": "プッシュ通知のマスタースイッチ",
   "pushPermissionDenied": "通知の許可が拒否されました。",
   "pushCategoriesSection": "受け取る内容",
@@ -29,9 +36,39 @@
   "pushCatDepositDesc": "ウェルカム・入金ボーナス（多めになりがち）",
   "pushCatOther": "その他キャンペーン",
   "pushCatOtherDesc": "手数料割引、Convertチャレンジなど",
+  "pushDigestTitle": "新しい機会",
+  "pushDigestBody": "{exchanges}に新しい{categories}があります。",
+  "@pushDigestBody": {
+    "placeholders": {
+      "exchanges": { "type": "String" },
+      "categories": { "type": "String" }
+    }
+  },
+  "pushDigestListTwo": "{a}、{b}",
+  "@pushDigestListTwo": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestListTwoMore": "{a}、{b}など",
+  "@pushDigestListTwoMore": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestCatContest": "大会",
+  "pushDigestCatEarn": "Earn",
+  "pushDigestCatListing": "上場",
+  "pushDigestCatDeposit": "入金ボーナス",
+  "pushDigestCatOther": "キャンペーン",
+  "pushDigestExBinance": "Binance",
+  "pushDigestExBybit": "Bybit",
+  "pushDigestExOkx": "OKX",
   "refreshTooltip": "更新",
   "loadingEvents": "イベントを読み込み中…",
-  "loadingEarn": "Flexible USDT Earn を読み込み中…",
+  "loadingEarn": "Stable Coin Earn を読み込み中…",
   "noMatchingItems": "条件に一致する項目がありません。",
   "noEvents": "表示できるイベントがありません。",
   "noEarnProducts": "表示できる Earn 商品がありません。",
@@ -115,14 +152,15 @@
   "adConfirmMessage": "広告を視聴するとAI要約を確認できます。続けますか？",
   "cancel": "キャンセル",
   "adConfirmContinue": "広告を見て続行",
-  "earnHeroTitle": "Flexible USDT",
-  "earnHeroBody": "取引所ごとのFlexible USDT利回りです。階層・時点により実効利回りが変わる場合があります。",
-  "earnMinAmount": "最低 {amount} USDT",
+  "earnHeroTitle": "Stable Coin Earn",
+  "earnHeroBody": "取引所ごとのFlexibleステーブルコイン利回りです。下でコインを選んでください。階層・時点により実効利回りが変わる場合があります。",
+  "earnFlexibleBadge": "Flexible",
+  "earnMinAmount": "最低 {amount} {coin}",
   "earnMarketApr": "Market APR {value}",
   "earnOpenPage": "Earnページへ",
   "earnUnavailableBitget": "Bitget Savingsの照会にはAPIキーが必要です。",
-  "earnUnavailableUpbit": "Upbitに公開Flexible USDT Earn APIはありません。",
-  "earnUnavailableBithumb": "Bithumbに公開Flexible USDT Earn APIはありません。",
+  "earnUnavailableUpbit": "Upbitに公開Flexible Earn APIはありません。",
+  "earnUnavailableBithumb": "Bithumbに公開Flexible Earn APIはありません。",
   "earnTierNote": "金額帯により適用APRが異なる場合があります。",
   "bannerBybitTitle": "トレーディングキャンペーン",
   "bannerBybitBody": "最新の報酬と大会を一覧で",

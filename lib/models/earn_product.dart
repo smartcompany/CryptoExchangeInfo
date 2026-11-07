@@ -17,10 +17,10 @@ class EarnTier {
     );
   }
 
-  String get rangeLabel {
+  String rangeLabel([String coin = 'USDT']) {
     final start = min ?? '?';
     final end = (max == null || max == '-1' || max == '') ? '∞' : max!;
-    return '$start ~ $end USDT';
+    return '$start ~ $end $coin';
   }
 }
 

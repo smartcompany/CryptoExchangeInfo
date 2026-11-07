@@ -5,13 +5,16 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import 'push_local_notifications.dart';
 import 'push_preferences.dart';
 import 'push_register_service.dart';
 import 'push_topics.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // Data handled when user opens the notification.
+  // Data-only digest: build localized local notification in this isolate.
+  await Firebase.initializeApp();
+  await PushLocalNotifications.showFromRemoteMessage(message);
 }
 
 /// FCM topic sync from [PushPreferences] + notification open handling.
@@ -23,6 +26,7 @@ class PushNotificationService {
   PushPreferences prefs = PushPreferences();
   final Set<String> _subscribed = {};
   StreamSubscription<String>? _tokenRefreshSub;
+  StreamSubscription<RemoteMessage>? _foregroundSub;
   Timer? _tokenRetryTimer;
   var _tokenRetryAttempt = 0;
 
@@ -39,15 +43,23 @@ class PushNotificationService {
     // so API keys are not duplicated in Dart source (GitHub secret scanning).
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    await PushLocalNotifications.ensureInitialized();
+    await PushLocalNotifications.handleLaunchPayload();
 
     prefs = await PushPreferences.load();
 
     final messaging = FirebaseMessaging.instance;
+    // Data-only FCM: do not rely on OS presentation of notification payloads.
     await messaging.setForegroundNotificationPresentationOptions(
-      alert: true,
-      badge: true,
-      sound: true,
+      alert: false,
+      badge: false,
+      sound: false,
     );
+
+    await _foregroundSub?.cancel();
+    _foregroundSub = FirebaseMessaging.onMessage.listen((message) {
+      unawaited(PushLocalNotifications.showFromRemoteMessage(message));
+    });
 
     FirebaseMessaging.onMessageOpenedApp.listen(openFromMessage);
     final initial = await messaging.getInitialMessage();
@@ -145,7 +157,7 @@ class PushNotificationService {
     if (prefs.masterEnabled) await syncTopics();
   }
 
-  /// Upsert FCM token + prefs into Supabase via Railway.
+  /// Upsert FCM token + prefs into Supabase via API.
   Future<void> registerPushToken({String? tokenOverride}) async {
     if (kIsWeb) return;
     if (!(defaultTargetPlatform == TargetPlatform.iOS ||
@@ -166,7 +178,7 @@ class PushNotificationService {
     );
     if (!ok) {
       debugPrint(
-        '[push] register failed (check Railway SUPABASE_* env + API logs)',
+        '[push] register failed (check SUPABASE_* env + API logs)',
       );
     }
     _scheduleTokenRetryIfNeeded(token: token);

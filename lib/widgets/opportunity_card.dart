@@ -40,22 +40,22 @@ class _OpportunityCardState extends State<OpportunityCard> {
         vertical: 6,
       ),
       child: Material(
-        color: AppColors.card,
+        color: Colors.transparent,
         elevation: 0,
-        shadowColor: Colors.black12,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(20),
         child: InkWell(
           onTap: () => _showDetail(context),
-          borderRadius: BorderRadius.circular(18),
+          borderRadius: BorderRadius.circular(20),
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.line),
+              borderRadius: BorderRadius.circular(20),
+              color: AppColors.glassFill,
+              border: Border.all(color: AppColors.glassStroke),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
+                  color: AppColors.brandDark.withValues(alpha: 0.06),
+                  blurRadius: 18,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -268,7 +268,7 @@ class _OpportunityCardState extends State<OpportunityCard> {
       context: context,
       isScrollControlled: true,
       showDragHandle: true,
-      backgroundColor: AppColors.card,
+      backgroundColor: AppColors.glassFillStrong,
       builder: (sheetContext) {
         return SafeArea(
           child: SingleChildScrollView(

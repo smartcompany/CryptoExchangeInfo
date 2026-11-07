@@ -2,17 +2,24 @@
   "@@locale": "en",
   "appTitle": "Exora",
   "sectionEvents": "Exchange events",
-  "sectionEarning": "Earning (Flexible USDT)",
-  "sectionEarningShort": "Flexible USDT",
+  "sectionEarning": "Stable Coin Earn",
+  "sectionEarningShort": "Stable Coin Earn",
   "menuSelect": "Choose a menu",
   "searchEventsHint": "Search events",
   "searchTooltip": "Search",
   "searchCloseTooltip": "Close search",
+  "shareTooltip": "Share",
+  "shareMessage": "Check out Exora — crypto exchange hub\n{url}",
+  "@shareMessage": {
+    "placeholders": {
+      "url": { "type": "String" }
+    }
+  },
   "notificationsTooltip": "Notifications",
   "notificationsComingSoon": "Notifications are coming soon.",
   "pushSettingsTitle": "Push alerts",
   "pushSettingsIntro": "Get notified about useful exchange opportunities without opening the app. Turn on only what you care about.",
-  "pushMasterTitle": "Opportunity alerts",
+  "pushMasterTitle": "Turn all push alerts on/off",
   "pushMasterSubtitle": "Master switch for push notifications",
   "pushPermissionDenied": "Notification permission was denied.",
   "pushCategoriesSection": "What to receive",
@@ -29,9 +36,39 @@
   "pushCatDepositDesc": "Welcome and deposit bonus campaigns (can be noisy)",
   "pushCatOther": "Other campaigns",
   "pushCatOtherDesc": "Fee discounts, convert challenges, and the rest",
+  "pushDigestTitle": "New opportunities",
+  "pushDigestBody": "New {categories} on {exchanges}.",
+  "@pushDigestBody": {
+    "placeholders": {
+      "exchanges": { "type": "String" },
+      "categories": { "type": "String" }
+    }
+  },
+  "pushDigestListTwo": "{a}, {b}",
+  "@pushDigestListTwo": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestListTwoMore": "{a}, {b}, and more",
+  "@pushDigestListTwoMore": {
+    "placeholders": {
+      "a": { "type": "String" },
+      "b": { "type": "String" }
+    }
+  },
+  "pushDigestCatContest": "contests",
+  "pushDigestCatEarn": "Earn",
+  "pushDigestCatListing": "listings",
+  "pushDigestCatDeposit": "deposit bonuses",
+  "pushDigestCatOther": "campaigns",
+  "pushDigestExBinance": "Binance",
+  "pushDigestExBybit": "Bybit",
+  "pushDigestExOkx": "OKX",
   "refreshTooltip": "Refresh",
   "loadingEvents": "Loading events…",
-  "loadingEarn": "Loading Flexible USDT Earn…",
+  "loadingEarn": "Loading Stable Coin Earn…",
   "noMatchingItems": "No items match your filters.",
   "noEvents": "No events to show.",
   "noEarnProducts": "No Earn products to show.",
@@ -163,12 +200,16 @@
   "adConfirmMessage": "Watch an ad to unlock the AI summary. Continue?",
   "cancel": "Cancel",
   "adConfirmContinue": "Watch ad & continue",
-  "earnHeroTitle": "Flexible USDT",
-  "earnHeroBody": "Flexible USDT rates by exchange. Effective APR can vary by tier and timing.",
-  "earnMinAmount": "Min {amount} USDT",
+  "earnHeroTitle": "Stable Coin Earn",
+  "earnHeroBody": "Flexible stablecoin rates by exchange. Pick a coin below. Effective APR can vary by tier and timing.",
+  "earnFlexibleBadge": "Flexible",
+  "earnMinAmount": "Min {amount} {coin}",
   "@earnMinAmount": {
     "placeholders": {
       "amount": {
+        "type": "String"
+      },
+      "coin": {
         "type": "String"
       }
     }
@@ -183,8 +224,8 @@
   },
   "earnOpenPage": "Open Earn page",
   "earnUnavailableBitget": "Bitget Savings requires an API key.",
-  "earnUnavailableUpbit": "Upbit has no public Flexible USDT Earn API.",
-  "earnUnavailableBithumb": "Bithumb has no public Flexible USDT Earn API.",
+  "earnUnavailableUpbit": "Upbit has no public Flexible Earn API.",
+  "earnUnavailableBithumb": "Bithumb has no public Flexible Earn API.",
   "earnTierNote": "Applied APR may vary by balance tier.",
   "bannerBybitTitle": "Trading campaigns",
   "bannerBybitBody": "Catch the latest Bybit rewards and contests",

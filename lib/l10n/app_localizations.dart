@@ -117,13 +117,13 @@ abstract class AppLocalizations {
   /// No description provided for @sectionEarning.
   ///
   /// In en, this message translates to:
-  /// **'Earning (Flexible USDT)'**
+  /// **'Stable Coin Earn'**
   String get sectionEarning;
 
   /// No description provided for @sectionEarningShort.
   ///
   /// In en, this message translates to:
-  /// **'Flexible USDT'**
+  /// **'Stable Coin Earn'**
   String get sectionEarningShort;
 
   /// No description provided for @menuSelect.
@@ -149,6 +149,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close search'**
   String get searchCloseTooltip;
+
+  /// No description provided for @shareTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get shareTooltip;
+
+  /// No description provided for @shareMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Check out Exora — crypto exchange hub\n{url}'**
+  String shareMessage(String url);
 
   /// No description provided for @notificationsTooltip.
   ///
@@ -177,7 +189,7 @@ abstract class AppLocalizations {
   /// No description provided for @pushMasterTitle.
   ///
   /// In en, this message translates to:
-  /// **'Opportunity alerts'**
+  /// **'Turn all push alerts on/off'**
   String get pushMasterTitle;
 
   /// No description provided for @pushMasterSubtitle.
@@ -276,6 +288,78 @@ abstract class AppLocalizations {
   /// **'Fee discounts, convert challenges, and the rest'**
   String get pushCatOtherDesc;
 
+  /// No description provided for @pushDigestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New opportunities'**
+  String get pushDigestTitle;
+
+  /// No description provided for @pushDigestBody.
+  ///
+  /// In en, this message translates to:
+  /// **'New {categories} on {exchanges}.'**
+  String pushDigestBody(String exchanges, String categories);
+
+  /// No description provided for @pushDigestListTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'{a}, {b}'**
+  String pushDigestListTwo(String a, String b);
+
+  /// No description provided for @pushDigestListTwoMore.
+  ///
+  /// In en, this message translates to:
+  /// **'{a}, {b}, and more'**
+  String pushDigestListTwoMore(String a, String b);
+
+  /// No description provided for @pushDigestCatContest.
+  ///
+  /// In en, this message translates to:
+  /// **'contests'**
+  String get pushDigestCatContest;
+
+  /// No description provided for @pushDigestCatEarn.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn'**
+  String get pushDigestCatEarn;
+
+  /// No description provided for @pushDigestCatListing.
+  ///
+  /// In en, this message translates to:
+  /// **'listings'**
+  String get pushDigestCatListing;
+
+  /// No description provided for @pushDigestCatDeposit.
+  ///
+  /// In en, this message translates to:
+  /// **'deposit bonuses'**
+  String get pushDigestCatDeposit;
+
+  /// No description provided for @pushDigestCatOther.
+  ///
+  /// In en, this message translates to:
+  /// **'campaigns'**
+  String get pushDigestCatOther;
+
+  /// No description provided for @pushDigestExBinance.
+  ///
+  /// In en, this message translates to:
+  /// **'Binance'**
+  String get pushDigestExBinance;
+
+  /// No description provided for @pushDigestExBybit.
+  ///
+  /// In en, this message translates to:
+  /// **'Bybit'**
+  String get pushDigestExBybit;
+
+  /// No description provided for @pushDigestExOkx.
+  ///
+  /// In en, this message translates to:
+  /// **'OKX'**
+  String get pushDigestExOkx;
+
   /// No description provided for @refreshTooltip.
   ///
   /// In en, this message translates to:
@@ -291,7 +375,7 @@ abstract class AppLocalizations {
   /// No description provided for @loadingEarn.
   ///
   /// In en, this message translates to:
-  /// **'Loading Flexible USDT Earn…'**
+  /// **'Loading Stable Coin Earn…'**
   String get loadingEarn;
 
   /// No description provided for @noMatchingItems.
@@ -753,20 +837,26 @@ abstract class AppLocalizations {
   /// No description provided for @earnHeroTitle.
   ///
   /// In en, this message translates to:
-  /// **'Flexible USDT'**
+  /// **'Stable Coin Earn'**
   String get earnHeroTitle;
 
   /// No description provided for @earnHeroBody.
   ///
   /// In en, this message translates to:
-  /// **'Flexible USDT rates by exchange. Effective APR can vary by tier and timing.'**
+  /// **'Flexible stablecoin rates by exchange. Pick a coin below. Effective APR can vary by tier and timing.'**
   String get earnHeroBody;
+
+  /// No description provided for @earnFlexibleBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get earnFlexibleBadge;
 
   /// No description provided for @earnMinAmount.
   ///
   /// In en, this message translates to:
-  /// **'Min {amount} USDT'**
-  String earnMinAmount(String amount);
+  /// **'Min {amount} {coin}'**
+  String earnMinAmount(String amount, String coin);
 
   /// No description provided for @earnMarketApr.
   ///
@@ -789,13 +879,13 @@ abstract class AppLocalizations {
   /// No description provided for @earnUnavailableUpbit.
   ///
   /// In en, this message translates to:
-  /// **'Upbit has no public Flexible USDT Earn API.'**
+  /// **'Upbit has no public Flexible Earn API.'**
   String get earnUnavailableUpbit;
 
   /// No description provided for @earnUnavailableBithumb.
   ///
   /// In en, this message translates to:
-  /// **'Bithumb has no public Flexible USDT Earn API.'**
+  /// **'Bithumb has no public Flexible Earn API.'**
   String get earnUnavailableBithumb;
 
   /// No description provided for @earnTierNote.

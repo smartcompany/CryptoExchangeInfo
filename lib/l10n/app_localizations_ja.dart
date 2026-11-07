@@ -15,10 +15,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get sectionEvents => '取引所イベント';
 
   @override
-  String get sectionEarning => 'Earning（Flexible USDT）';
+  String get sectionEarning => 'Stable Coin Earn';
 
   @override
-  String get sectionEarningShort => 'Flexible USDT';
+  String get sectionEarningShort => 'Stable Coin Earn';
 
   @override
   String get menuSelect => 'メニューを選択';
@@ -31,6 +31,14 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get searchCloseTooltip => '検索を閉じる';
+
+  @override
+  String get shareTooltip => '共有';
+
+  @override
+  String shareMessage(String url) {
+    return 'Exora — 暗号資産取引所ハブをチェック\n$url';
+  }
 
   @override
   String get notificationsTooltip => '通知';
@@ -46,7 +54,7 @@ class AppLocalizationsJa extends AppLocalizations {
       'アプリを開かなくても役立つ取引所の機会を受け取れます。必要な項目だけオンにしてください。';
 
   @override
-  String get pushMasterTitle => '機会アラート';
+  String get pushMasterTitle => 'プッシュ通知のオン/オフ';
 
   @override
   String get pushMasterSubtitle => 'プッシュ通知のマスタースイッチ';
@@ -97,13 +105,55 @@ class AppLocalizationsJa extends AppLocalizations {
   String get pushCatOtherDesc => '手数料割引、Convertチャレンジなど';
 
   @override
+  String get pushDigestTitle => '新しい機会';
+
+  @override
+  String pushDigestBody(String exchanges, String categories) {
+    return '$exchangesに新しい$categoriesがあります。';
+  }
+
+  @override
+  String pushDigestListTwo(String a, String b) {
+    return '$a、$b';
+  }
+
+  @override
+  String pushDigestListTwoMore(String a, String b) {
+    return '$a、$bなど';
+  }
+
+  @override
+  String get pushDigestCatContest => '大会';
+
+  @override
+  String get pushDigestCatEarn => 'Earn';
+
+  @override
+  String get pushDigestCatListing => '上場';
+
+  @override
+  String get pushDigestCatDeposit => '入金ボーナス';
+
+  @override
+  String get pushDigestCatOther => 'キャンペーン';
+
+  @override
+  String get pushDigestExBinance => 'Binance';
+
+  @override
+  String get pushDigestExBybit => 'Bybit';
+
+  @override
+  String get pushDigestExOkx => 'OKX';
+
+  @override
   String get refreshTooltip => '更新';
 
   @override
   String get loadingEvents => 'イベントを読み込み中…';
 
   @override
-  String get loadingEarn => 'Flexible USDT Earn を読み込み中…';
+  String get loadingEarn => 'Stable Coin Earn を読み込み中…';
 
   @override
   String get noMatchingItems => '条件に一致する項目がありません。';
@@ -349,15 +399,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get adConfirmContinue => '広告を見て続行';
 
   @override
-  String get earnHeroTitle => 'Flexible USDT';
+  String get earnHeroTitle => 'Stable Coin Earn';
 
   @override
   String get earnHeroBody =>
-      '取引所ごとのFlexible USDT利回りです。階層・時点により実効利回りが変わる場合があります。';
+      '取引所ごとのFlexibleステーブルコイン利回りです。下でコインを選んでください。階層・時点により実効利回りが変わる場合があります。';
 
   @override
-  String earnMinAmount(String amount) {
-    return '最低 $amount USDT';
+  String get earnFlexibleBadge => 'Flexible';
+
+  @override
+  String earnMinAmount(String amount, String coin) {
+    return '最低 $amount $coin';
   }
 
   @override
@@ -372,11 +425,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get earnUnavailableBitget => 'Bitget Savingsの照会にはAPIキーが必要です。';
 
   @override
-  String get earnUnavailableUpbit => 'Upbitに公開Flexible USDT Earn APIはありません。';
+  String get earnUnavailableUpbit => 'Upbitに公開Flexible Earn APIはありません。';
 
   @override
-  String get earnUnavailableBithumb =>
-      'Bithumbに公開Flexible USDT Earn APIはありません。';
+  String get earnUnavailableBithumb => 'Bithumbに公開Flexible Earn APIはありません。';
 
   @override
   String get earnTierNote => '金額帯により適用APRが異なる場合があります。';

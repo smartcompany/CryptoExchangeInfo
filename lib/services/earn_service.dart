@@ -3,10 +3,16 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import '../models/earn_product.dart';
+import '../models/stable_coin.dart';
 
-class FlexibleUsdtEarnResult {
-  const FlexibleUsdtEarnResult({required this.items, required this.fetchedAt});
+class FlexibleEarnResult {
+  const FlexibleEarnResult({
+    required this.coin,
+    required this.items,
+    required this.fetchedAt,
+  });
 
+  final StableCoin coin;
   final List<EarnProduct> items;
   final DateTime? fetchedAt;
 }
@@ -15,6 +21,7 @@ class EarnService {
   EarnService({http.Client? client}) : _client = client ?? http.Client();
 
   final http.Client _client;
+  final Map<StableCoin, FlexibleEarnResult> _cache = {};
 
   static const _browserHeaders = {
     'User-Agent':
@@ -23,47 +30,52 @@ class EarnService {
     'Accept-Language': 'en-US,en;q=0.9,ko;q=0.8',
   };
 
-  /// Client-side live Flexible USDT rates for every tab exchange.
-  Future<FlexibleUsdtEarnResult> fetchFlexibleUsdt() async {
-    final results = await Future.wait([
-      _fetchBinance(),
-      _fetchBybit(),
-      _fetchOkx(),
-      _fetchGate(),
-      Future.value(
-        _unavailable(exchange: 'mexc', note: 'unavailable_public_api'),
-      ),
-      Future.value(
-        _unavailable(exchange: 'bitget', note: 'unavailable_auth_required'),
-      ),
-      Future.value(
-        _unavailable(exchange: 'kucoin', note: 'unavailable_auth_required'),
-      ),
-      Future.value(
-        _unavailable(exchange: 'coinbase', note: 'unavailable_no_flexible_usdt'),
-      ),
-      Future.value(_unavailable(exchange: 'upbit', note: 'unavailable_upbit')),
-      Future.value(
-        _unavailable(exchange: 'bithumb', note: 'unavailable_bithumb'),
-      ),
+  /// Live Flexible rates for [coin] across exchanges (cached until forceRefresh).
+  Future<FlexibleEarnResult> fetchFlexible(
+    StableCoin coin, {
+    bool forceRefresh = false,
+  }) async {
+    if (!forceRefresh) {
+      final hit = _cache[coin];
+      if (hit != null) return hit;
+    }
+
+    final symbol = coin.symbol;
+    // Only live public Flexible APIs — unsupported exchanges are omitted.
+    final fetched = await Future.wait([
+      _fetchBinance(symbol),
+      _fetchBybit(symbol),
+      _fetchOkx(symbol),
+      _fetchGate(symbol),
     ]);
+    final results = fetched.where((p) => p.available).toList()
+      ..sort((a, b) {
+        final ap = a.aprPercent ?? -1;
+        final bp = b.aprPercent ?? -1;
+        return bp.compareTo(ap);
+      });
 
-    results.sort((a, b) {
-      final ap = a.available ? (a.aprPercent ?? -1) : -2;
-      final bp = b.available ? (b.aprPercent ?? -1) : -2;
-      return bp.compareTo(ap);
-    });
-
-    return FlexibleUsdtEarnResult(
+    final result = FlexibleEarnResult(
+      coin: coin,
       items: results,
       fetchedAt: DateTime.now().toUtc(),
     );
+    _cache[coin] = result;
+    return result;
   }
 
-  EarnProduct _unavailable({required String exchange, required String note}) {
+  @Deprecated('Use fetchFlexible(StableCoin.usdt)')
+  Future<FlexibleEarnResult> fetchFlexibleUsdt() =>
+      fetchFlexible(StableCoin.usdt);
+
+  EarnProduct _unavailable({
+    required String exchange,
+    required String coin,
+    required String note,
+  }) {
     return EarnProduct.fromJson({
       'exchange': exchange,
-      'coin': 'USDT',
+      'coin': coin,
       'productType': 'flexible',
       'available': false,
       'aprPercent': null,
@@ -76,15 +88,16 @@ class EarnService {
     });
   }
 
-  Future<EarnProduct> _fetchBybit() async {
+  Future<EarnProduct> _fetchBybit(String coin) async {
     try {
       final uri = Uri.parse('https://api.bybit.com/v5/earn/product').replace(
-        queryParameters: {'category': 'FlexibleSaving', 'coin': 'USDT'},
+        queryParameters: {'category': 'FlexibleSaving', 'coin': coin},
       );
       final res = await _client.get(uri).timeout(const Duration(seconds: 20));
       if (res.statusCode != 200) {
         return _unavailable(
           exchange: 'bybit',
+          coin: coin,
           note: 'Bybit HTTP ${res.statusCode}',
         );
       }
@@ -92,6 +105,7 @@ class EarnService {
       if (body['retCode'] != 0) {
         return _unavailable(
           exchange: 'bybit',
+          coin: coin,
           note: body['retMsg']?.toString() ?? 'Bybit error',
         );
       }
@@ -99,7 +113,8 @@ class EarnService {
       if (list.isEmpty) {
         return _unavailable(
           exchange: 'bybit',
-          note: 'No USDT Flexible product',
+          coin: coin,
+          note: 'No $coin Flexible product',
         );
       }
       final raw = list.first as Map<String, dynamic>;
@@ -115,7 +130,7 @@ class EarnService {
       }
       return EarnProduct.fromJson({
         'exchange': 'bybit',
-        'coin': 'USDT',
+        'coin': coin,
         'productType': 'flexible',
         'available': true,
         'aprPercent': _parsePercentNumber(aprDisplay),
@@ -129,11 +144,11 @@ class EarnService {
         'note': tiers.isNotEmpty ? 'tier_note' : null,
       });
     } catch (e) {
-      return _unavailable(exchange: 'bybit', note: e.toString());
+      return _unavailable(exchange: 'bybit', coin: coin, note: e.toString());
     }
   }
 
-  Future<EarnProduct> _fetchBinance() async {
+  Future<EarnProduct> _fetchBinance(String coin) async {
     try {
       final uri =
           Uri.parse(
@@ -142,7 +157,7 @@ class EarnService {
             queryParameters: {
               'pageSize': '5',
               'pageIndex': '1',
-              'asset': 'USDT',
+              'asset': coin,
             },
           );
       final res = await _client
@@ -160,6 +175,7 @@ class EarnService {
       if (res.statusCode != 200) {
         return _unavailable(
           exchange: 'binance',
+          coin: coin,
           note: 'Binance HTTP ${res.statusCode}',
         );
       }
@@ -167,6 +183,7 @@ class EarnService {
       if (body['code']?.toString() != '000000') {
         return _unavailable(
           exchange: 'binance',
+          coin: coin,
           note: body['message']?.toString() ?? 'Binance error',
         );
       }
@@ -174,7 +191,8 @@ class EarnService {
       if (list.isEmpty) {
         return _unavailable(
           exchange: 'binance',
-          note: 'No USDT Flexible product',
+          coin: coin,
+          note: 'No $coin Flexible product',
         );
       }
       final raw = list.first;
@@ -193,7 +211,7 @@ class EarnService {
       final aprPercent = latest == null ? null : latest * 100;
       return EarnProduct.fromJson({
         'exchange': 'binance',
-        'coin': 'USDT',
+        'coin': coin,
         'productType': 'flexible',
         'available': true,
         'aprPercent': aprPercent,
@@ -208,21 +226,22 @@ class EarnService {
         'note': 'Easy Earn Flexible. Published APR may differ from tier rates.',
       });
     } catch (e) {
-      return _unavailable(exchange: 'binance', note: e.toString());
+      return _unavailable(exchange: 'binance', coin: coin, note: e.toString());
     }
   }
 
-  Future<EarnProduct> _fetchOkx() async {
+  Future<EarnProduct> _fetchOkx(String coin) async {
     try {
       final uri = Uri.parse(
         'https://www.okx.com/api/v5/finance/savings/lending-rate-summary',
-      ).replace(queryParameters: {'ccy': 'USDT'});
+      ).replace(queryParameters: {'ccy': coin});
       final res = await _client
           .get(uri, headers: _browserHeaders)
           .timeout(const Duration(seconds: 20));
       if (res.statusCode != 200) {
         return _unavailable(
           exchange: 'okx',
+          coin: coin,
           note: 'OKX HTTP ${res.statusCode}',
         );
       }
@@ -230,12 +249,17 @@ class EarnService {
       if (body['code']?.toString() != '0') {
         return _unavailable(
           exchange: 'okx',
+          coin: coin,
           note: body['msg']?.toString() ?? 'OKX error',
         );
       }
       final list = (body['data'] as List? ?? []).cast<Map<String, dynamic>>();
       if (list.isEmpty) {
-        return _unavailable(exchange: 'okx', note: 'No USDT Flexible rate');
+        return _unavailable(
+          exchange: 'okx',
+          coin: coin,
+          note: 'No $coin Flexible rate',
+        );
       }
       final raw = list.first;
       final est = _asDouble(raw['estRate']);
@@ -244,7 +268,7 @@ class EarnService {
       final aprPercent = est == null ? null : est * 100;
       return EarnProduct.fromJson({
         'exchange': 'okx',
-        'coin': 'USDT',
+        'coin': coin,
         'productType': 'flexible',
         'available': true,
         'aprPercent': aprPercent,
@@ -260,15 +284,15 @@ class EarnService {
             'OKX Simple Earn / Savings estimated and average rates (annualized, decimal to %).',
       });
     } catch (e) {
-      return _unavailable(exchange: 'okx', note: e.toString());
+      return _unavailable(exchange: 'okx', coin: coin, note: e.toString());
     }
   }
 
   /// Gate Uni public hourly rate → approximate APR%.
-  Future<EarnProduct> _fetchGate() async {
+  Future<EarnProduct> _fetchGate(String coin) async {
     try {
       final uri = Uri.parse(
-        'https://api.gateio.ws/api/v4/earn/uni/currencies/USDT',
+        'https://api.gateio.ws/api/v4/earn/uni/currencies/$coin',
       );
       final res = await _client
           .get(uri, headers: _browserHeaders)
@@ -276,6 +300,7 @@ class EarnService {
       if (res.statusCode != 200) {
         return _unavailable(
           exchange: 'gate',
+          coin: coin,
           note: 'Gate HTTP ${res.statusCode}',
         );
       }
@@ -286,18 +311,21 @@ class EarnService {
                 ? body.first as Map<String, dynamic>
                 : <String, dynamic>{});
       if (raw.isEmpty) {
-        return _unavailable(exchange: 'gate', note: 'No USDT Uni product');
+        return _unavailable(
+          exchange: 'gate',
+          coin: coin,
+          note: 'No $coin Uni product',
+        );
       }
       final maxHourly = _asDouble(raw['max_rate']);
       final minHourly = _asDouble(raw['min_rate']);
-      // Gate Uni lend rate is hourly; APR% ≈ hourly * 24 * 365 * 100.
       final aprPercent =
           maxHourly == null ? null : maxHourly * 24 * 365 * 100;
       final minApr =
           minHourly == null ? null : minHourly * 24 * 365 * 100;
       return EarnProduct.fromJson({
         'exchange': 'gate',
-        'coin': 'USDT',
+        'coin': coin,
         'productType': 'flexible',
         'available': aprPercent != null,
         'aprPercent': aprPercent,
@@ -306,14 +334,14 @@ class EarnService {
         'minAmount': raw['min_lend_amount']?.toString(),
         'maxAmount': raw['max_lend_amount']?.toString(),
         'status': 'Available',
-        'productId': 'uni-usdt',
+        'productId': 'uni-${coin.toLowerCase()}',
         'hasTieredApr': false,
         'tiers': <Map<String, dynamic>>[],
         'note':
             'Gate Simple Earn / Uni approximate APR from public hourly max rate.',
       });
     } catch (e) {
-      return _unavailable(exchange: 'gate', note: e.toString());
+      return _unavailable(exchange: 'gate', coin: coin, note: e.toString());
     }
   }
 

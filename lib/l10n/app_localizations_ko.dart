@@ -15,10 +15,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get sectionEvents => '거래소 이벤트';
 
   @override
-  String get sectionEarning => 'Earning (Flexible USDT)';
+  String get sectionEarning => 'Stable Coin Earn';
 
   @override
-  String get sectionEarningShort => 'Flexible USDT';
+  String get sectionEarningShort => 'Stable Coin Earn';
 
   @override
   String get menuSelect => '메뉴 선택';
@@ -31,6 +31,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get searchCloseTooltip => '검색 닫기';
+
+  @override
+  String get shareTooltip => '공유';
+
+  @override
+  String shareMessage(String url) {
+    return 'Exora — 암호화폐 거래소 허브를 확인해 보세요\n$url';
+  }
 
   @override
   String get notificationsTooltip => '알림';
@@ -46,7 +54,7 @@ class AppLocalizationsKo extends AppLocalizations {
       '앱을 켜지 않아도 유용한 거래소 기회를 받아보세요. 관심 있는 항목만 켜 두세요.';
 
   @override
-  String get pushMasterTitle => '새 기회 알림';
+  String get pushMasterTitle => '푸시 알림 전체 켜기/끄기';
 
   @override
   String get pushMasterSubtitle => '푸시 알림 전체 켜기/끄기';
@@ -98,13 +106,55 @@ class AppLocalizationsKo extends AppLocalizations {
   String get pushCatOtherDesc => '수수료 할인, Convert 챌린지 등';
 
   @override
+  String get pushDigestTitle => '새 기회 알림';
+
+  @override
+  String pushDigestBody(String exchanges, String categories) {
+    return '$exchanges에 새로운 $categories 소식이 있습니다.';
+  }
+
+  @override
+  String pushDigestListTwo(String a, String b) {
+    return '$a, $b';
+  }
+
+  @override
+  String pushDigestListTwoMore(String a, String b) {
+    return '$a, $b 등';
+  }
+
+  @override
+  String get pushDigestCatContest => '대회';
+
+  @override
+  String get pushDigestCatEarn => 'Earn';
+
+  @override
+  String get pushDigestCatListing => '상장';
+
+  @override
+  String get pushDigestCatDeposit => '입금 보너스';
+
+  @override
+  String get pushDigestCatOther => '이벤트';
+
+  @override
+  String get pushDigestExBinance => '바이낸스';
+
+  @override
+  String get pushDigestExBybit => 'Bybit';
+
+  @override
+  String get pushDigestExOkx => 'OKX';
+
+  @override
   String get refreshTooltip => '새로고침';
 
   @override
   String get loadingEvents => '이벤트 불러오는 중…';
 
   @override
-  String get loadingEarn => 'Flexible USDT Earn 불러오는 중…';
+  String get loadingEarn => 'Stable Coin Earn 불러오는 중…';
 
   @override
   String get noMatchingItems => '조건에 맞는 항목이 없습니다.';
@@ -350,15 +400,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get adConfirmContinue => '광고 보고 계속';
 
   @override
-  String get earnHeroTitle => 'Flexible USDT';
+  String get earnHeroTitle => 'Stable Coin Earn';
 
   @override
   String get earnHeroBody =>
-      '거래소별 유연(Flexible) USDT 거치 금리입니다. 구간·시점에 따라 실효 금리가 달라질 수 있습니다.';
+      '거래소별 유연(Flexible) 스테이블코인 거치 금리입니다. 아래에서 코인을 고르세요. 구간·시점에 따라 실효 금리가 달라질 수 있습니다.';
 
   @override
-  String earnMinAmount(String amount) {
-    return '최소 $amount USDT';
+  String get earnFlexibleBadge => 'Flexible';
+
+  @override
+  String earnMinAmount(String amount, String coin) {
+    return '최소 $amount $coin';
   }
 
   @override
@@ -373,10 +426,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get earnUnavailableBitget => 'Bitget Savings 상품 조회는 API 키가 필요합니다.';
 
   @override
-  String get earnUnavailableUpbit => '업비트는 공개 Flexible USDT Earn API가 없습니다.';
+  String get earnUnavailableUpbit => '업비트는 공개 Flexible Earn API가 없습니다.';
 
   @override
-  String get earnUnavailableBithumb => '빗썸은 공개 Flexible USDT Earn API가 없습니다.';
+  String get earnUnavailableBithumb => '빗썸은 공개 Flexible Earn API가 없습니다.';
 
   @override
   String get earnTierNote => '금액 구간에 따라 적용 APR이 달라질 수 있습니다.';

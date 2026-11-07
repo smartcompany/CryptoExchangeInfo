@@ -56,7 +56,6 @@ class _PushSettingsScreenState extends State<PushSettingsScreen> {
                 l10n.pushMasterTitle,
                 style: const TextStyle(fontWeight: FontWeight.w800),
               ),
-              subtitle: Text(l10n.pushMasterSubtitle),
               value: masterOn,
               activeThumbColor: AppColors.brand,
               onChanged: _busy
@@ -89,7 +88,8 @@ class _PushSettingsScreenState extends State<PushSettingsScreen> {
             child: Column(
               children: [
                 for (final cat in PushCategory.values)
-                  SwitchListTile.adaptive(
+                  // Material (not adaptive): iOS green stays vivid when disabled+on.
+                  SwitchListTile(
                     contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                     title: Text(
                       _categoryTitle(l10n, cat),
@@ -97,7 +97,12 @@ class _PushSettingsScreenState extends State<PushSettingsScreen> {
                     ),
                     subtitle: Text(_categorySubtitle(l10n, cat)),
                     value: _prefs.categoryEnabled(cat),
-                    activeThumbColor: AppColors.brand,
+                    activeThumbColor: masterOn ? AppColors.brand : AppColors.muted,
+                    activeTrackColor: masterOn
+                        ? AppColors.brand.withValues(alpha: 0.45)
+                        : AppColors.line,
+                    inactiveThumbColor: AppColors.card,
+                    inactiveTrackColor: AppColors.chipIdle,
                     onChanged: !masterOn || _busy
                         ? null
                         : (v) => _run(() async {
@@ -124,12 +129,16 @@ class _PushSettingsScreenState extends State<PushSettingsScreen> {
   }
 
   Widget _card({required Widget child}) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.line),
+    // Material (not DecoratedBox) so ListTile ink/splash paint correctly.
+    return Material(
+      color: AppColors.glassFill,
+      elevation: 2,
+      shadowColor: AppColors.brandDark.withValues(alpha: 0.12),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+        side: const BorderSide(color: AppColors.glassStroke),
       ),
+      clipBehavior: Clip.antiAlias,
       child: child,
     );
   }

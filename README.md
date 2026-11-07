@@ -8,26 +8,13 @@
 | 용도 | 방식 |
 |------|------|
 | 이벤트·Earn·이미지 | 앱이 거래소 공개 API를 **직접** 호출 |
-| 설정·AI 분석 | Vercel 또는 Cloudflare Workers (아래) |
-
-설정·AI 서버 선택 (`lib/services/exchange_events_service.dart`):
-
-- 코드: `ApiBackend.activeApiBackend` → `railway` / `vercel` / `cloudflare`
-- 또는 실행 시: `--dart-define=EXORA_API_BACKEND=vercel`
-
-| 백엔드 | URL |
-|--------|-----|
-| Railway (기본) | `https://cryptoexchangeinfoserver-production.up.railway.app` |
-| Vercel | `https://cryptoexchangeinfoserver.vercel.app` |
-| Cloudflare | `https://cryptoexchangeinfoserver.gunnylove.workers.dev` |
+| 설정·AI 분석 | Vercel (`https://cryptoexchangeinfoserver.vercel.app`) |
 
 ## 실행
 
 ```bash
 flutter pub get
 flutter run
-# Cloudflare Workers 로 테스트:
-flutter run --dart-define=EXORA_API_BACKEND=cloudflare
 ```
 
 ## 스토어 빌드·메타데이터
