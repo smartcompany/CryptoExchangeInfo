@@ -322,20 +322,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get cannotOpenEarnPage => 'Couldn\'t open the Earn page.';
 
   @override
-  String get aiSummary => 'AI summary';
+  String get aiSummary => 'AI details';
 
   @override
   String get aiAnalyzing => 'Analyzing';
 
   @override
-  String get aiEasyExplainTitle => 'AI simple guide';
+  String get aiEasyExplainTitle => 'AI detailed explanation';
 
   @override
   String get aiDisclaimer =>
       'Draft only — not investment advice. Prefer the original terms and rewards.';
 
   @override
-  String get aiGoToSource => 'Open original';
+  String get aiGoToSource => 'Participate';
+
+  @override
+  String get aiClose => 'Close';
 
   @override
   String get aiSectionReward => 'Reward';
@@ -396,11 +399,11 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get adConfirmTitle => 'AI summary';
+  String get adConfirmTitle => 'AI details';
 
   @override
   String get adConfirmMessage =>
-      'Watch an ad to unlock the AI summary. Continue?';
+      'Watch an ad to unlock the AI detailed explanation. Continue?';
 
   @override
   String get cancel => 'Cancel';

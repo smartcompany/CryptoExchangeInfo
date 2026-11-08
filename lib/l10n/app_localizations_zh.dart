@@ -315,19 +315,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get cannotOpenEarnPage => '无法打开 Earn 页面。';
 
   @override
-  String get aiSummary => 'AI 摘要';
+  String get aiSummary => 'AI 详情';
 
   @override
   String get aiAnalyzing => '分析中';
 
   @override
-  String get aiEasyExplainTitle => 'AI 简明说明';
+  String get aiEasyExplainTitle => 'AI 详细说明';
 
   @override
   String get aiDisclaimer => '仅为草稿，不构成投资建议。请优先查看原文条件与奖励。';
 
   @override
-  String get aiGoToSource => '前往原文';
+  String get aiGoToSource => '去参与';
+
+  @override
+  String get aiClose => '关闭';
 
   @override
   String get aiSectionReward => '奖励';
@@ -385,10 +388,10 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get adConfirmTitle => 'AI 摘要';
+  String get adConfirmTitle => 'AI 详情';
 
   @override
-  String get adConfirmMessage => '观看广告后即可查看 AI 摘要。是否继续？';
+  String get adConfirmMessage => '观看广告后即可查看 AI 详细说明。是否继续？';
 
   @override
   String get cancel => '取消';

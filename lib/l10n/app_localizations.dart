@@ -681,7 +681,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiSummary.
   ///
   /// In en, this message translates to:
-  /// **'AI summary'**
+  /// **'AI details'**
   String get aiSummary;
 
   /// No description provided for @aiAnalyzing.
@@ -693,7 +693,7 @@ abstract class AppLocalizations {
   /// No description provided for @aiEasyExplainTitle.
   ///
   /// In en, this message translates to:
-  /// **'AI simple guide'**
+  /// **'AI detailed explanation'**
   String get aiEasyExplainTitle;
 
   /// No description provided for @aiDisclaimer.
@@ -705,8 +705,14 @@ abstract class AppLocalizations {
   /// No description provided for @aiGoToSource.
   ///
   /// In en, this message translates to:
-  /// **'Open original'**
+  /// **'Participate'**
   String get aiGoToSource;
+
+  /// No description provided for @aiClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get aiClose;
 
   /// No description provided for @aiSectionReward.
   ///
@@ -813,13 +819,13 @@ abstract class AppLocalizations {
   /// No description provided for @adConfirmTitle.
   ///
   /// In en, this message translates to:
-  /// **'AI summary'**
+  /// **'AI details'**
   String get adConfirmTitle;
 
   /// No description provided for @adConfirmMessage.
   ///
   /// In en, this message translates to:
-  /// **'Watch an ad to unlock the AI summary. Continue?'**
+  /// **'Watch an ad to unlock the AI detailed explanation. Continue?'**
   String get adConfirmMessage;
 
   /// No description provided for @cancel.

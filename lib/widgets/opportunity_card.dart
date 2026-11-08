@@ -166,7 +166,6 @@ class _OpportunityCardState extends State<OpportunityCard> {
                   Row(
                     children: [
                       Expanded(
-                        flex: 6,
                         child: AiSummaryButton(
                           busy: _analyzing,
                           onPressed: _analyzing ? null : _runAi,
@@ -174,7 +173,6 @@ class _OpportunityCardState extends State<OpportunityCard> {
                       ),
                       const SizedBox(width: 10),
                       Expanded(
-                        flex: 4,
                         child: OfficialLinkButton(
                           onPressed: () => _openOfficial(context),
                         ),
@@ -366,7 +364,6 @@ class _OpportunityCardState extends State<OpportunityCard> {
                 Row(
                   children: [
                     Expanded(
-                      flex: 6,
                       child: AiSummaryButton(
                         busy: _analyzing,
                         onPressed: _analyzing
@@ -379,7 +376,6 @@ class _OpportunityCardState extends State<OpportunityCard> {
                     ),
                     const SizedBox(width: 10),
                     Expanded(
-                      flex: 4,
                       child: OfficialLinkButton(
                         onPressed: () {
                           Navigator.pop(sheetContext);

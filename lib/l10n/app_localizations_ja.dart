@@ -316,19 +316,22 @@ class AppLocalizationsJa extends AppLocalizations {
   String get cannotOpenEarnPage => 'Earn ページを開けません。';
 
   @override
-  String get aiSummary => 'AI要約';
+  String get aiSummary => 'AI詳細';
 
   @override
   String get aiAnalyzing => '分析中';
 
   @override
-  String get aiEasyExplainTitle => 'AIかんたん解説';
+  String get aiEasyExplainTitle => 'AI詳細な説明';
 
   @override
   String get aiDisclaimer => '下書きであり投資助言ではありません。条件・報酬は原文を優先してください。';
 
   @override
-  String get aiGoToSource => '本文へ移動';
+  String get aiGoToSource => '参加する';
+
+  @override
+  String get aiClose => '閉じる';
 
   @override
   String get aiSectionReward => '報酬';
@@ -387,10 +390,10 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get adConfirmTitle => 'AI要約';
+  String get adConfirmTitle => 'AI詳細';
 
   @override
-  String get adConfirmMessage => '広告を視聴するとAI要約を確認できます。続けますか？';
+  String get adConfirmMessage => '広告を視聴するとAI詳細な説明を確認できます。続けますか？';
 
   @override
   String get cancel => 'キャンセル';

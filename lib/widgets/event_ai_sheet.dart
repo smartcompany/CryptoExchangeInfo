@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../l10n/app_localizations.dart';
 import '../services/event_ai_service.dart';
 import '../services/exchange_referral.dart';
 import '../theme/app_colors.dart';
-import 'ai_summary_button.dart';
 
 /// Presents AI analysis as a fullscreen modal (iOS-style present).
 Future<void> presentEventAiAnalysis(
@@ -65,7 +65,7 @@ class EventAiAnalysisPage extends StatelessWidget {
           ),
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
               sliver: SliverList(
                 delegate: SliverChildListDelegate([
                   Text(
@@ -76,39 +76,90 @@ class EventAiAnalysisPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 22),
                   if (analysis.summary.isNotEmpty) ...[
-                    Text(analysis.summary, style: theme.textTheme.bodyLarge),
+                    _AiMarkdownBody(
+                      data: analysis.summary,
+                      style: theme.textTheme.bodyLarge,
+                    ),
                     const SizedBox(height: 20),
                   ],
                   if (analysis.reward.isNotEmpty)
                     _Section(
+                      icon: '🎁',
                       label: l10n.aiSectionReward,
                       body: analysis.reward,
                     ),
                   if (analysis.period.isNotEmpty)
                     _Section(
+                      icon: '📅',
                       label: l10n.aiSectionPeriod,
                       body: analysis.period,
                     ),
                   if (analysis.conditions.isNotEmpty)
                     _BulletSection(
+                      icon: '✅',
                       label: l10n.aiSectionConditions,
                       items: analysis.conditions,
                     ),
                   if (analysis.cautions.isNotEmpty)
                     _BulletSection(
+                      icon: '⚠️',
                       label: l10n.aiSectionCautions,
                       items: analysis.cautions,
                     ),
-                  if (_hasSourceUrl) ...[
-                    const SizedBox(height: 8),
-                    OfficialLinkButton(
-                      onPressed: () => _openSource(context),
-                      label: l10n.aiGoToSource,
-                    ),
-                  ],
                 ]),
               ),
             ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: SafeArea(
+        minimum: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => Navigator.of(context).pop(),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  backgroundColor: AppColors.card,
+                  side: const BorderSide(color: AppColors.line),
+                  minimumSize: const Size.fromHeight(48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+                child: Text(
+                  l10n.aiClose,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w700,
+                    fontSize: 15,
+                  ),
+                ),
+              ),
+            ),
+            if (_hasSourceUrl) ...[
+              const SizedBox(width: 10),
+              Expanded(
+                child: FilledButton(
+                  onPressed: () => _openSource(context),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppColors.brand,
+                    foregroundColor: Colors.white,
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                  child: Text(
+                    l10n.aiGoToSource,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -137,11 +188,41 @@ class EventAiAnalysisPage extends StatelessWidget {
   }
 }
 
+class _AiMarkdownBody extends StatelessWidget {
+  const _AiMarkdownBody({required this.data, this.style});
+
+  final String data;
+  final TextStyle? style;
+
+  @override
+  Widget build(BuildContext context) {
+    final base = style ?? Theme.of(context).textTheme.bodyMedium;
+    final mdStyle = MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+      p: base?.copyWith(height: 1.45),
+      strong: base?.copyWith(fontWeight: FontWeight.w800, height: 1.45),
+      listBullet: base,
+      pPadding: const EdgeInsets.only(bottom: 10),
+      blockSpacing: 8,
+    );
+    return MarkdownBody(
+      data: data,
+      selectable: true,
+      softLineBreak: true,
+      styleSheet: mdStyle,
+    );
+  }
+}
+
 class _Section extends StatelessWidget {
-  const _Section({required this.label, required this.body});
+  const _Section({
+    required this.label,
+    required this.body,
+    this.icon,
+  });
 
   final String label;
   final String body;
+  final String? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -152,11 +233,11 @@ class _Section extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            icon == null ? label : '$icon $label',
             style: theme.textTheme.labelLarge?.copyWith(color: AppColors.brand),
           ),
           const SizedBox(height: 6),
-          Text(body, style: theme.textTheme.bodyMedium),
+          _AiMarkdownBody(data: body, style: theme.textTheme.bodyMedium),
         ],
       ),
     );
@@ -164,10 +245,15 @@ class _Section extends StatelessWidget {
 }
 
 class _BulletSection extends StatelessWidget {
-  const _BulletSection({required this.label, required this.items});
+  const _BulletSection({
+    required this.label,
+    required this.items,
+    this.icon,
+  });
 
   final String label;
   final List<String> items;
+  final String? icon;
 
   @override
   Widget build(BuildContext context) {
@@ -178,19 +264,22 @@ class _BulletSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            label,
+            icon == null ? label : '$icon $label',
             style: theme.textTheme.labelLarge?.copyWith(color: AppColors.brand),
           ),
           const SizedBox(height: 8),
           ...items.map(
             (item) => Padding(
-              padding: const EdgeInsets.only(bottom: 6),
+              padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('· ', style: theme.textTheme.bodyMedium),
                   Expanded(
-                    child: Text(item, style: theme.textTheme.bodyMedium),
+                    child: _AiMarkdownBody(
+                      data: item,
+                      style: theme.textTheme.bodyMedium,
+                    ),
                   ),
                 ],
               ),

@@ -317,19 +317,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get cannotOpenEarnPage => 'Earn 페이지를 열 수 없습니다.';
 
   @override
-  String get aiSummary => 'AI 요약';
+  String get aiSummary => 'AI 상세';
 
   @override
   String get aiAnalyzing => '분석 중';
 
   @override
-  String get aiEasyExplainTitle => 'AI 쉬운 설명';
+  String get aiEasyExplainTitle => 'AI 상세한 설명';
 
   @override
   String get aiDisclaimer => '초안이며 투자 권유가 아닙니다. 조건·보상은 원문을 우선하세요.';
 
   @override
-  String get aiGoToSource => '본문으로 이동';
+  String get aiGoToSource => '참여하기';
+
+  @override
+  String get aiClose => '닫기';
 
   @override
   String get aiSectionReward => '보상';
@@ -388,10 +391,10 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get adConfirmTitle => 'AI 요약';
+  String get adConfirmTitle => 'AI 상세';
 
   @override
-  String get adConfirmMessage => '광고를 시청한 뒤 AI 요약을 확인할 수 있습니다. 계속할까요?';
+  String get adConfirmMessage => '광고를 시청한 뒤 AI 상세 설명을 확인할 수 있습니다. 계속할까요?';
 
   @override
   String get cancel => '취소';
